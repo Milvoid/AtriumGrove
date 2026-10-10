@@ -1,3 +1,4 @@
+import { translate } from "../apps/web/src/i18n.js";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -66,7 +67,10 @@ test("Live text, block ordering, child lanes and tool input updates survive repl
   assert.equal(state.items[0]!.text, "开始工作\n\n检查");
   assert.equal(state.items.length, 3);
   assert.equal(state.terminal, undefined);
-  assert.equal(toolTitle(state.items[1]!), "读取文件 · src/index.ts");
+  assert.equal(
+    toolTitle(state.items[1]!),
+    translate("读取文件") + " · src/index.ts",
+  );
   const complete = projectTrace(
     mergeTrace(records, [
       event(8, {
@@ -200,17 +204,20 @@ test("Queued messages remain visible before a run exists, including lost session
     );
     const pending = f.s.conversationActivity(f.channel.id).items;
     assert.equal(pending.length, 1);
-    assert.match(pendingActivityLabel(pending[0]!), /会话连接异常/);
+    assert.equal(
+      pendingActivityLabel(pending[0]!),
+      translate("会话连接异常，消息尚未开始处理"),
+    );
     assert.equal(f.db.get("SELECT count(*) n FROM runs")!.n, 0);
     const other = f.s.createChannel(f.ws.id, "Other");
     assert.equal(f.s.conversationActivity(other.id).items.length, 0);
-    assert.match(
+    assert.equal(
       pendingActivityLabel({
         hostState: "online",
         agentState: "starting",
         episodeState: "open",
       }),
-      /连接模型/,
+      translate("正在连接模型…"),
     );
   } finally {
     f.db.close();

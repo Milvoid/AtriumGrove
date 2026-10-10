@@ -1,3 +1,4 @@
+import { translate, getLocale } from "./i18n.js";
 import React, { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
@@ -41,16 +42,16 @@ function Tool({ item, finished }: { item: Activity; finished: boolean }) {
                 : "◌"}
         </span>
         <span className="tool-title">{toolTitle(item)}</span>
-        {item.lane.length > 0 && <small>子任务</small>}
+        {item.lane.length > 0 && <small>{translate("子任务")}</small>}
         <small>
           {item.outcome === "error"
-            ? "失败"
+            ? translate("失败")
             : item.outcome === "cancelled"
-              ? "已取消"
+              ? translate("已取消")
               : !item.outcome
                 ? finished
-                  ? "未返回结果"
-                  : "进行中"
+                  ? translate("未返回结果")
+                  : translate("进行中")
                 : ""}
         </small>
       </summary>
@@ -67,14 +68,18 @@ function Tool({ item, finished }: { item: Activity; finished: boolean }) {
                 <img
                   loading="lazy"
                   src={`/v1/artifacts/${o.artifactId}/content`}
-                  alt="电脑操作截图"
+                  alt={translate("电脑操作截图")}
                 />
               </a>
             ) : (
-              <p className="error">截图留存失败；原始截图已返回成员。</p>
+              <p className="error">
+                {translate("截图留存失败；原始截图已返回成员。")}
+              </p>
             )}
             <figcaption>
-              历史截图 · {new Date(o.capturedAt).toLocaleTimeString()}
+              {translate("历史截图 · {time}", {
+                time: new Date(o.capturedAt).toLocaleTimeString(getLocale()),
+              })}
             </figcaption>
           </figure>
         ))}
@@ -86,7 +91,7 @@ function Tool({ item, finished }: { item: Activity; finished: boolean }) {
         ) : item.text ? (
           <pre>{item.text}</pre>
         ) : (
-          <p>等待工具返回结果</p>
+          <p>{translate("等待工具返回结果")}</p>
         )}
       </div>
     </details>
@@ -173,27 +178,27 @@ export function RunActivity({
     } else groups.push(item);
   }
   return (
-    <div className="run-activity" aria-label="执行过程">
+    <div className="run-activity" aria-label={translate("执行过程")}>
       {trace.isPending && (
         <p className="activity-status" role="status">
-          正在读取执行过程…
+          {translate("正在读取执行过程…")}
         </p>
       )}
       {trace.isError && (
         <button className="activity-error" onClick={() => void trace.refetch()}>
-          执行过程读取失败，点击重试
+          {translate("执行过程读取失败，点击重试")}
         </button>
       )}
       {groups.map((group) =>
         Array.isArray(group) ? (
           <details className="tool-group" key={group[0]!.id} open>
             <summary>
-              {group.length} 项工具操作{" "}
+              {translate("{count} 项工具操作", { count: group.length })}{" "}
               <span>
                 {group.some((i) => i.outcome === "error")
-                  ? "· 有失败"
+                  ? translate("· 有失败")
                   : group.some((i) => !i.outcome) && !finished
-                    ? "· 进行中"
+                    ? translate("· 进行中")
                     : ""}
               </span>
             </summary>
@@ -207,7 +212,11 @@ export function RunActivity({
               remarkPlugins={[remarkGfm]}
               skipHtml
               components={{
-                img: ({ alt }) => <span>[图片：{alt}]</span>,
+                img: ({ alt }) => (
+                  <span>
+                    {translate("[图片：{name}]", { name: alt ?? "" })}
+                  </span>
+                ),
                 a: ({ href, children }) => (
                   <a href={href} target="_blank" rel="noopener noreferrer">
                     {children}
@@ -233,7 +242,7 @@ export function RunActivity({
       {terminal?.error?.message && (
         <p className="error">
           {terminal.error.message === '"success"'
-            ? "本次执行失败，原因见上方模型返回信息。"
+            ? translate("本次执行失败，原因见上方模型返回信息。")
             : terminal.error.message}
         </p>
       )}
@@ -242,8 +251,8 @@ export function RunActivity({
           <span className={!finished ? "activity-pulse" : ""} />
           <span>
             {run.state === "running" && !items.length
-              ? "等待模型输出…"
-              : (states[run.state] ?? run.state)}
+              ? translate("等待模型输出…")
+              : (translate(states[run.state] ?? run.state) ?? run.state)}
           </span>
           {elapsed > 0 && (
             <time>
@@ -251,7 +260,9 @@ export function RunActivity({
             </time>
           )}
           <button onClick={onInspect}>
-            {run.state === "waiting_approval" ? "查看审批" : "查看执行"}
+            {run.state === "waiting_approval"
+              ? translate("查看审批")
+              : translate("查看执行")}
           </button>
         </div>
       )}

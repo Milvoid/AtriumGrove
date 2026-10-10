@@ -1,3 +1,16 @@
+import {
+  GeneralSettings,
+  SettingsNavigation,
+  isSettingsView,
+} from "./settings.js";
+import { LanguagePicker, useLanguage } from "./language-picker.js";
+import {
+  translate,
+  getLocale,
+  translateError,
+  apiErrorMessage,
+  homeTitles,
+} from "./i18n.js";
 import { RunActivity } from "./activity.js";
 import {
   mergeTrace,
@@ -42,8 +55,7 @@ async function api(
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const result = await response.json();
-  if (!response.ok)
-    throw new Error(result.message ?? `Request failed (${response.status})`);
+  if (!response.ok) throw new Error(apiErrorMessage(result, response.status));
   return result;
 }
 const queryClient = new QueryClient({
@@ -72,6 +84,7 @@ const labels: Record<string, string> = {
   cancelled: "已取消",
 };
 function App() {
+  useLanguage();
   const [logged, setLogged] = useState(false),
     [checking, setChecking] = useState(true),
     [token, setToken] = useState(""),
@@ -93,7 +106,7 @@ function App() {
   if (checking)
     return (
       <div className="loading">
-        Atrium Grove<span>连接工作室…</span>
+        Atrium Grove<span>{translate("连接工作室…")}</span>
       </div>
     );
   if (!logged)
@@ -101,17 +114,17 @@ function App() {
       <div className="login">
         <header className="login-header">
           <Brand />
-          <span>协作工作室</span>
+          <span>{translate("协作工作室")}</span>
         </header>
         <main className="login-main">
           <div className="login-symbol">
             <Icon name="lock" />
           </div>
-          <h1>登录工作室</h1>
+          <h1>{translate("登录工作室")}</h1>
           <p className="muted">
             {passwordEnabled
-              ? "输入密码，继续团队的工作。"
-              : "使用本机生成的一次性登录码。"}
+              ? translate("输入密码，继续团队的工作。")
+              : translate("使用本机生成的一次性登录码。")}
           </p>
           <form
             onSubmit={async (e) => {
@@ -136,7 +149,9 @@ function App() {
             }}
           >
             <label htmlFor="login-secret">
-              {passwordEnabled ? "登录密码" : "一次性登录码"}
+              {passwordEnabled
+                ? translate("登录密码")
+                : translate("一次性登录码")}
             </label>
             <input
               id="login-secret"
@@ -153,22 +168,24 @@ function App() {
             />
             {error && (
               <p id="login-error" role="alert" className="error">
-                {error}
+                {translateError(error)}
               </p>
             )}
             <button className="primary" disabled={loginBusy}>
-              {loginBusy ? "正在登录…" : "进入工作室"}
+              {loginBusy ? translate("正在登录…") : translate("进入工作室")}
               <Icon name="arrow" />
             </button>
             {!passwordEnabled && (
               <p className="hint">
-                在本机运行 <code>pnpm atrium-grove login-token</code> 获取登录码，有效期 5
-                分钟。
+                {translate("在本机运行 {command} 获取登录码，有效期 5 分钟。", {
+                  command: "pnpm atrium-grove login-token",
+                })}
               </p>
             )}
           </form>
         </main>
         <footer className="login-footer">
+          <LanguagePicker />
           <span className="status-dot idle" />
           {location.host}
         </footer>
@@ -187,6 +204,9 @@ function App() {
 }
 function Studio({ logout }: { logout: () => void }) {
   const qc = useQueryClient();
+  const [homeTitle, setHomeTitle] = useState(() =>
+    Math.floor(Math.random() * homeTitles.length),
+  );
   const [modal, setModal] = useState<
     "project" | "member" | "participants" | null
   >(null);
@@ -195,6 +215,7 @@ function Studio({ logout }: { logout: () => void }) {
   const startDraft = (wsId = workspace, folder = "") => {
     setWorkspace(wsId);
     setChannel("");
+    setHomeTitle(Math.floor(Math.random() * homeTitles.length));
     setProjectId(folder);
     setView("chat");
     setSelected(null);
@@ -482,12 +503,13 @@ function Studio({ logout }: { logout: () => void }) {
       } catch (e) {
         if (stopped) return;
         if ((e as Error).message === "LOGIN_REQUIRED") {
-          setConnectionError("登录已过期，请退出后重新登录。");
+          setConnectionError(translate("登录已过期，请退出后重新登录。"));
           return;
         }
         if (!outage)
           outage = setTimeout(
-            () => setConnectionError("暂时无法获取新消息，正在重试。"),
+            () =>
+              setConnectionError(translate("暂时无法获取新消息，正在重试。")),
             15000,
           );
         timer = setTimeout(
@@ -596,9 +618,11 @@ function Studio({ logout }: { logout: () => void }) {
         <Modal
           title={
             {
-              project: editingProject ? "工作目录设置" : "选择工作目录",
-              member: "创建成员",
-              participants: "参与此对话的成员",
+              project: editingProject
+                ? translate("工作目录设置")
+                : translate("选择工作目录"),
+              member: translate("创建成员"),
+              participants: translate("参与此对话的成员"),
             }[modal]
           }
           close={() => setModal(null)}
@@ -656,93 +680,100 @@ function Studio({ logout }: { logout: () => void }) {
       {navOpen && (
         <button
           className="nav-scrim"
-          aria-label="关闭导航"
+          aria-label={translate("关闭导航")}
           onClick={() => setNavOpen(false)}
         />
       )}
       <aside className="sidebar">
-        <div className="sidebar-brand">
-          <a
-            href="/"
-            aria-label="Atrium Grove 首页"
-            onClick={(e) => {
-              e.preventDefault();
-              startDraft();
-            }}
-          >
-            <Brand />
-          </a>
-          <button
-            className="icon-button mobile-only"
-            aria-label="关闭导航"
-            onClick={() => setNavOpen(false)}
-          >
-            <Icon name="close" />
-          </button>
-        </div>
-        <button className="new-chat-entry" onClick={() => startDraft()}>
-          <Icon name="plus" />
-          新对话
-        </button>
-        <div className="nav-label">项目</div>
-        <div className="project-list">
-          {workspaces.data?.items.map((w: Item) => (
-            <ProjectTree
-              key={w.id}
-              workspace={w}
-              channel={view === "chat" ? channel : ""}
-              api={api}
-              select={(id, chat) => {
-                setWorkspace(id);
-                setChannel(chat);
-                setView("chat");
-                setSelected(null);
-                setNavOpen(false);
-              }}
-              createChat={(id, folder) => startDraft(id, folder)}
-            />
-          ))}
-        </div>
-        <div className="nav-label section-space">工作台</div>
-        <nav>
-          {[
-            ["members", "", "成员"],
-            ["tasks", "▦", "任务"],
-            ["runs", "≋", "运行记录"],
-            ["approvals", "◇", "审批中心"],
-            ["memory", "▤", "共享记忆"],
-            ["hosts", "⌘", "执行电脑"],
-            ["settings", "", "项目设置"],
-          ].map(([id, icon, label]) => (
-            <button
-              key={id}
-              className={view === id ? "active" : ""}
-              aria-current={view === id ? "page" : undefined}
-              onClick={() => {
-                setView(id!);
-                setNavOpen(false);
+        <div className="sidebar-scroll">
+          <div className="sidebar-brand">
+            <a
+              href="/"
+              aria-label={translate("Atrium Grove 首页")}
+              onClick={(e) => {
+                e.preventDefault();
+                startDraft();
               }}
             >
-              <Icon name={id!} />
-              <span>{label}</span>
-              {id === "approvals" && approvals.length > 0 && (
-                <em>{approvals.length}</em>
-              )}
+              <Brand />
+            </a>
+            <button
+              className="icon-button mobile-only"
+              aria-label={translate("关闭导航")}
+              onClick={() => setNavOpen(false)}
+            >
+              <Icon name="close" />
             </button>
-          ))}
-        </nav>
-        <div className="sidebar-footer">
-          <button onClick={logout}>
-            <Icon name="exit" />
-            退出登录
+          </div>
+          <button className="new-chat-entry" onClick={() => startDraft()}>
+            <Icon name="plus" />
+            {translate("新对话")}
           </button>
+          <div className="nav-label">{translate("项目")}</div>
+          <div className="project-list">
+            {workspaces.data?.items.map((w: Item) => (
+              <ProjectTree
+                key={w.id}
+                workspace={w}
+                channel={view === "chat" ? channel : ""}
+                api={api}
+                select={(id, chat) => {
+                  setWorkspace(id);
+                  setChannel(chat);
+                  setView("chat");
+                  setSelected(null);
+                  setNavOpen(false);
+                }}
+                createChat={(id, folder) => startDraft(id, folder)}
+              />
+            ))}
+          </div>
+          <div className="nav-label section-space">{translate("工作台")}</div>
+          <nav>
+            {[
+              ["members", translate("成员")],
+              ["tasks", translate("任务")],
+              ["approvals", translate("审批中心")],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                className={view === id ? "active" : ""}
+                aria-current={view === id ? "page" : undefined}
+                onClick={() => {
+                  setView(id!);
+                  setSelected(null);
+                  setNavOpen(false);
+                }}
+              >
+                <Icon name={id!} />
+                <span>{label}</span>
+                {id === "approvals" && approvals.length > 0 && (
+                  <em>{approvals.length}</em>
+                )}
+              </button>
+            ))}
+          </nav>
         </div>
+        <nav className="sidebar-footer" aria-label={translate("设置")}>
+          <button
+            className={isSettingsView(view) ? "active" : ""}
+            aria-current={isSettingsView(view) ? "page" : undefined}
+            onClick={() => {
+              setView("settings");
+              setSelected(null);
+              setNavOpen(false);
+            }}
+          >
+            <Icon name="settings" />
+            <span>{translate("设置")}</span>
+          </button>
+        </nav>
       </aside>
       <main id="main-content">
         <header className="topbar">
           <button
             className="icon-button mobile-only"
-            aria-label="打开导航"
+            aria-label={translate("打开导航")}
             onClick={() => setNavOpen(true)}
           >
             <Icon name="menu" />
@@ -753,29 +784,29 @@ function Studio({ logout }: { logout: () => void }) {
                 {view === "chat"
                   ? (snap?.channels.find((c: Item) => c.id === channel)?.name ??
                     "")
-                  : (
-                      {
-                        tasks: "任务",
-                        members: "成员",
-                        settings: "项目设置",
-                        runs: "运行记录",
-                        approvals: "审批中心",
-                        memory: "共享记忆",
-                        hosts: "执行电脑",
-                      } as Item
-                    )[view]}
+                  : isSettingsView(view)
+                    ? translate("设置")
+                    : (
+                        {
+                          tasks: translate("任务"),
+                          members: translate("成员"),
+
+                          approvals: translate("审批中心"),
+                        } as Item
+                      )[view]}
               </h1>
             )}
           </div>
           <div className="top-actions">
             {active > 0 && (
               <button className="activity" onClick={() => setView("runs")}>
-                {active} 项执行中
+                {translate("{count} 项执行中", { count: active })}
               </button>
             )}
             {workspace && channel && view === "chat" && (
               <button onClick={() => setModal("participants")}>
-                参与者{channelAgents.length ? ` · ${channelAgents.length}` : ""}
+                {translate("参与者")}
+                {channelAgents.length ? ` · ${channelAgents.length}` : ""}
               </button>
             )}
             {workspace && view === "members" && (
@@ -786,22 +817,32 @@ function Studio({ logout }: { logout: () => void }) {
                 }
               >
                 <Icon name="plus" />
-                创建成员
+                {translate("创建成员")}
               </button>
             )}
           </div>
         </header>
+        {isSettingsView(view) && (
+          <SettingsNavigation
+            view={view}
+            select={(next) => {
+              setView(next);
+              setSelected(null);
+            }}
+          />
+        )}
+        {view === "settings" && <GeneralSettings logout={logout} />}
         {connectionError && (
           <div className="inline-state error" role="alert">
-            {connectionError}
+            {translateError(connectionError)}
           </div>
         )}
         {error && (
           <div className="error banner" role="alert">
-            {error}
+            {translateError(error)}
             <button
               className="icon-button"
-              aria-label="关闭错误提示"
+              aria-label={translate("关闭错误提示")}
               onClick={() => setError("")}
             >
               <Icon name="close" />
@@ -809,19 +850,21 @@ function Studio({ logout }: { logout: () => void }) {
           </div>
         )}
         {workspace && snapshot.isError && (
-          <QueryFeedback query={snapshot} label="工作室" />
+          <QueryFeedback query={snapshot} label={translate("工作室")} />
         )}
         {workspace && view === "members" && (
           <section className="content-panel member-page">
             {!agents.length ? (
               <div className="start-state">
-                <p>尚未创建成员</p>
+                <p>{translate("尚未创建成员")}</p>
                 <button
                   onClick={() =>
                     setModal(projects.data?.items.length ? "member" : "project")
                   }
                 >
-                  {projects.data?.items.length ? "创建成员" : "先选择工作目录"}
+                  {projects.data?.items.length
+                    ? translate("创建成员")
+                    : translate("先选择工作目录")}
                 </button>
               </div>
             ) : (
@@ -856,17 +899,17 @@ function Studio({ logout }: { logout: () => void }) {
             )}
           </section>
         )}
-        {workspace && view === "settings" && (
+        {workspace && view === "project-settings" && (
           <section className="content-panel settings-page">
-            <h2>工作目录</h2>
+            <h2>{translate("工作目录")}</h2>
             {projects.data?.items.map((p: Item) => (
               <div className="project-row" key={p.id}>
                 <strong>{p.name}</strong>
                 <code>{p.rootPath}</code>
                 <span className="hint">
                   {p.workspaceMode === "git-worktree"
-                    ? "Git 工作副本"
-                    : "共享文件夹"}
+                    ? translate("Git 工作副本")
+                    : translate("共享文件夹")}
                 </span>
                 <button
                   onClick={() => {
@@ -874,15 +917,19 @@ function Studio({ logout }: { logout: () => void }) {
                     setModal("project");
                   }}
                 >
-                  设置
+                  {translate("设置")}
                 </button>
               </div>
             ))}
-            <button onClick={() => setModal("project")}>添加工作目录</button>
+            <button onClick={() => setModal("project")}>
+              {translate("添加工作目录")}
+            </button>
             <section className="execution-setting">
-              <h2>新执行</h2>
+              <h2>{translate("新执行")}</h2>
               <p>
-                暂停后，不再启动新的成员会话或消息处理。正在执行的工作会继续，任务分配保持原样。
+                {translate(
+                  "暂停后，不再启动新的成员会话或消息处理。正在执行的工作会继续，任务分配保持原样。",
+                )}
               </p>
               <button
                 onClick={() =>
@@ -892,7 +939,9 @@ function Studio({ logout }: { logout: () => void }) {
                   })
                 }
               >
-                {ws?.state === "paused" ? "恢复新执行" : "暂停新执行"}
+                {ws?.state === "paused"
+                  ? translate("恢复新执行")
+                  : translate("暂停新执行")}
               </button>
             </section>
           </section>
@@ -906,12 +955,14 @@ function Studio({ logout }: { logout: () => void }) {
           >
             {channel && messages.isPending ? (
               <div className="inline-state" role="status">
-                正在读取消息…
+                {translate("正在读取消息…")}
               </div>
             ) : messages.isError ? (
               <div className="inline-state error" role="alert">
-                消息读取失败。
-                <button onClick={() => void messages.refetch()}>重试</button>
+                {translate("消息读取失败。")}
+                <button onClick={() => void messages.refetch()}>
+                  {translate("重试")}
+                </button>
               </div>
             ) : null}
             <div
@@ -935,7 +986,7 @@ function Studio({ logout }: { logout: () => void }) {
                     <div className="message-meta">
                       <strong>{m.actor.displayName}</strong>
                       <time>
-                        {new Date(m.createdAt).toLocaleTimeString([], {
+                        {new Date(m.createdAt).toLocaleTimeString(getLocale(), {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
@@ -978,7 +1029,13 @@ function Studio({ logout }: { logout: () => void }) {
                                   {children}
                                 </a>
                               ),
-                              img: ({ alt }) => <span>[图片：{alt}]</span>,
+                              img: ({ alt }) => (
+                                <span>
+                                  {translate("[图片：{name}]", {
+                                    name: alt ?? "",
+                                  })}
+                                </span>
+                              ),
                             }}
                           >
                             {b.text}
@@ -990,12 +1047,14 @@ function Studio({ logout }: { logout: () => void }) {
                           className="artifact"
                           href={`/v1/artifacts/${b.artifactId}/content`}
                         >
-                          ↗ {b.caption ?? "查看工件"}
+                          ↗ {b.caption ?? translate("查看工件")}
                         </a>
                       ),
                     )}
                     <div className="message-actions">
-                      <button onClick={() => setReply(m)}>回复</button>
+                      <button onClick={() => setReply(m)}>
+                        {translate("回复")}
+                      </button>
                       <button
                         onClick={async () => {
                           let threadId = m.threadId;
@@ -1006,15 +1065,18 @@ function Studio({ logout }: { logout: () => void }) {
                                 title:
                                   m.blocks
                                     .find((b: Item) => b.type === "text")
-                                    ?.text.slice(0, 60) ?? "任务讨论",
+                                    ?.text.slice(0, 60) ??
+                                  translate("任务讨论"),
                               },
                             );
                             if (!t) return;
                             threadId = t.id;
                           }
                           const title = await request(
-                            "任务标题",
-                            "保留原消息作为任务来源，并进入独立评审流程。",
+                            translate("任务标题"),
+                            translate(
+                              "保留原消息作为任务来源，并进入独立评审流程。",
+                            ),
                           );
                           if (title)
                             await act(`/workspaces/${workspace}/tasks`, {
@@ -1027,17 +1089,19 @@ function Studio({ logout }: { logout: () => void }) {
                                 .map((b: Item) => b.text)
                                 .join("\n"),
                               acceptanceCriteria: [
-                                "提供实现与测试证据，并通过独立评审",
+                                translate("提供实现与测试证据，并通过独立评审"),
                               ],
                             });
                         }}
                       >
-                        转为任务
+                        {translate("转为任务")}
                       </button>
                       <span>
                         {m.requestResponse
-                          ? `已保存 · 通知 ${m.recipientAgentIds.length} 位成员`
-                          : "已保存 · 仅记录"}
+                          ? translate("已保存 · 通知 {v0} 位成员", {
+                              v0: m.recipientAgentIds.length,
+                            })
+                          : translate("已保存 · 仅记录")}
                       </span>
                     </div>
                   </div>
@@ -1045,13 +1109,15 @@ function Studio({ logout }: { logout: () => void }) {
               ))}
               {chatRuns.isError && (
                 <p className="error" role="alert">
-                  执行状态读取失败，正在重试。
-                  <button onClick={() => void chatRuns.refetch()}>重试</button>
+                  {translate("执行状态读取失败，正在重试。")}
+                  <button onClick={() => void chatRuns.refetch()}>
+                    {translate("重试")}
+                  </button>
                 </p>
               )}
               {pendingActivity.isError && (
                 <p className="error" role="alert">
-                  等待状态读取失败，正在重试。
+                  {translate("等待状态读取失败，正在重试。")}
                 </p>
               )}
               {pendingActivity.data?.items.map((item: Item) => (
@@ -1080,7 +1146,7 @@ function Studio({ logout }: { logout: () => void }) {
                       <div className="message-meta">
                         <strong>
                           {agents.find((a) => a.id === r.agentId)?.name ??
-                            "成员"}
+                            translate("成员")}
                         </strong>
                       </div>
                       <RunActivity
@@ -1119,15 +1185,20 @@ function Studio({ logout }: { logout: () => void }) {
                   ]);
                 }}
               >
-                加载后续消息
+                {translate("加载后续消息")}
               </button>
+            )}
+            {!channel && (
+              <h1 className="home-title">
+                {translate(homeTitles[homeTitle]!)}
+              </h1>
             )}
             <form className="composer" onSubmit={send}>
               {reply && (
                 <div className="replying">
-                  回复 {reply.actor.displayName}
+                  {translate("回复 {name}", { name: reply.actor.displayName })}
                   <button type="button" onClick={() => setReply(null)}>
-                    取消
+                    {translate("取消")}
                   </button>
                 </div>
               )}
@@ -1141,8 +1212,8 @@ function Studio({ logout }: { logout: () => void }) {
                   e.target.style.height =
                     Math.min(e.target.scrollHeight, 200) + "px";
                 }}
-                placeholder="输入消息…"
-                aria-label="消息正文"
+                placeholder={translate("输入消息…")}
+                aria-label={translate("消息正文")}
                 onKeyDown={(e) => {
                   if (
                     e.key === "Enter" &&
@@ -1175,10 +1246,12 @@ function Studio({ logout }: { logout: () => void }) {
               <div className="composer-tools">
                 <label
                   className="attachment-picker"
-                  title={uploading ? "上传中…" : "添加附件"}
+                  title={
+                    uploading ? translate("上传中…") : translate("添加附件")
+                  }
                 >
                   <Icon name="plus" />
-                  <span className="sr-only">添加附件</span>
+                  <span className="sr-only">{translate("添加附件")}</span>
                   <input
                     type="file"
                     multiple
@@ -1186,14 +1259,16 @@ function Studio({ logout }: { logout: () => void }) {
                     onChange={async (e) => {
                       const files = Array.from(e.target.files ?? []);
                       if (files.length + attachments.length > 16) {
-                        setError("每条消息最多 16 个附件");
+                        setError(translate("每条消息最多 16 个附件"));
                         return;
                       }
                       setUploading(true);
                       try {
                         for (const file of files) {
                           if (file.size > 25 * 1024 * 1024)
-                            throw new Error("单个工件不得超过 25 MiB");
+                            throw new Error(
+                              translate("单个工件不得超过 25 MiB"),
+                            );
                           const response = await fetch(
                             `/v1/workspaces/${workspace}/artifacts`,
                             {
@@ -1208,7 +1283,10 @@ function Studio({ logout }: { logout: () => void }) {
                             },
                           );
                           const result = await response.json();
-                          if (!response.ok) throw new Error(result.message);
+                          if (!response.ok)
+                            throw new Error(
+                              apiErrorMessage(result, response.status),
+                            );
                           setAttachments((items) => [...items, result]);
                         }
                       } catch (error) {
@@ -1222,11 +1300,11 @@ function Studio({ logout }: { logout: () => void }) {
                 </label>
                 <div
                   className="directory-context"
-                  title={project?.rootPath || "选择工作目录"}
+                  title={project?.rootPath || translate("选择工作目录")}
                 >
                   <Icon name="folder" />
                   <select
-                    aria-label="当前工作目录"
+                    aria-label={translate("当前工作目录")}
                     value={projectId}
                     disabled={!!channel}
                     onChange={(e) =>
@@ -1235,7 +1313,9 @@ function Studio({ logout }: { logout: () => void }) {
                         : setProjectId(e.target.value)
                     }
                   >
-                    {!projectId && <option value="">工作目录</option>}
+                    {!projectId && (
+                      <option value="">{translate("工作目录")}</option>
+                    )}
                     {projects.data?.items.map((p: Item) => (
                       <option key={p.id} value={p.id}>
                         {p.rootPath.split("/").filter(Boolean).at(-1) ||
@@ -1243,14 +1323,16 @@ function Studio({ logout }: { logout: () => void }) {
                         {p.workspaceMode === "git-worktree" ? " · Git" : ""}
                       </option>
                     ))}
-                    <option value="__add">选择其他本机目录…</option>
+                    <option value="__add">
+                      {translate("选择其他本机目录…")}
+                    </option>
                   </select>
                 </div>
                 <div className="composer-bottom">
                   {!channel ? (
                     <details className="draft-participants">
                       <summary>
-                        参与成员
+                        {translate("参与成员")}
                         {channelAgents.length
                           ? ` · ${channelAgents.length}`
                           : ""}
@@ -1279,27 +1361,31 @@ function Studio({ logout }: { logout: () => void }) {
                             type="button"
                             onClick={() => setView("members")}
                           >
-                            前往成员页添加成员
+                            {translate("前往成员页添加成员")}
                           </button>
                         )}
                       </div>
                     </details>
                   ) : (
                     <select
-                      aria-label="通知方式"
+                      aria-label={translate("通知方式")}
                       value={mode}
                       onChange={(e) => setMode(e.target.value)}
                     >
-                      <option value="all">所有参与者</option>
-                      <option value="selected">选择收件人</option>
-                      <option value="record">仅记录</option>
+                      <option value="all">{translate("所有参与者")}</option>
+                      <option value="selected">
+                        {translate("选择收件人")}
+                      </option>
+                      <option value="record">{translate("仅记录")}</option>
                     </select>
                   )}
 
                   <button
                     className="primary send-button"
-                    aria-label={sending ? "发送中" : "发送消息"}
-                    title="Enter 发送，Shift+Enter 换行"
+                    aria-label={
+                      sending ? translate("发送中") : translate("发送消息")
+                    }
+                    title={translate("Enter 发送，Shift+Enter 换行")}
                     disabled={
                       (!text.trim() && !attachments.length) ||
                       (!channel && !projectId) ||
@@ -1340,7 +1426,7 @@ function Studio({ logout }: { logout: () => void }) {
           </div>
         )}
         {workspace && view === "tasks" && (
-          <QueryFeedback query={tasks} label="任务" />
+          <QueryFeedback query={tasks} label={translate("任务")} />
         )}
         {workspace && view === "tasks" && (
           <div className="board">
@@ -1348,7 +1434,7 @@ function Studio({ logout }: { logout: () => void }) {
               (status) => (
                 <section className="board-column" key={status}>
                   <h3>
-                    {labels[status]}{" "}
+                    {translate(labels[status]!)}{" "}
                     <span>
                       {tasks.data?.items.filter(
                         (t: Item) => t.status === status,
@@ -1358,12 +1444,16 @@ function Studio({ logout }: { logout: () => void }) {
                   {!tasks.isPending &&
                     !tasks.data?.items.some(
                       (t: Item) => t.status === status,
-                    ) && <p className="column-empty">暂无任务</p>}
+                    ) && (
+                      <p className="column-empty">{translate("暂无任务")}</p>
+                    )}
                   {tasks.data?.items
                     .filter((t: Item) => t.status === status)
                     .map((t: Item) => (
                       <div className="task-card" key={t.id}>
-                        <small>版本 {t.version}</small>
+                        <small>
+                          {translate("版本 {version}", { version: t.version })}
+                        </small>
                         <h4>{t.title}</h4>
                         <div className="task-description">
                           <ReactMarkdown skipHtml remarkPlugins={[remarkGfm]}>
@@ -1372,11 +1462,11 @@ function Studio({ logout }: { logout: () => void }) {
                         </div>
                         <span className="muted">
                           {agents.find((a) => a.id === t.assigneeAgentId)
-                            ?.name ?? "尚未领取"}
+                            ?.name ?? translate("尚未领取")}
                         </span>
                         {status === "todo" && (
                           <select
-                            aria-label="分配任务"
+                            aria-label={translate("分配任务")}
                             defaultValue=""
                             onChange={(e) => {
                               if (e.target.value)
@@ -1386,7 +1476,7 @@ function Studio({ logout }: { logout: () => void }) {
                                 });
                             }}
                           >
-                            <option value="">分配给…</option>
+                            <option value="">{translate("分配给…")}</option>
                             {agents.map((a) => (
                               <option key={a.id} value={a.id}>
                                 {a.name}
@@ -1398,8 +1488,8 @@ function Studio({ logout }: { logout: () => void }) {
                           <button
                             onClick={async () => {
                               const reason = await request(
-                                "验收说明",
-                                "说明证据与验收结论。",
+                                translate("验收说明"),
+                                translate("说明证据与验收结论。"),
                               );
                               if (reason)
                                 void act(`/tasks/${t.id}/transition`, {
@@ -1411,11 +1501,13 @@ function Studio({ logout }: { logout: () => void }) {
                                 });
                             }}
                           >
-                            验收完成
+                            {translate("验收完成")}
                           </button>
                         )}
                         <div className="task-evidence">
-                          {t.artifactIds.length} 个证据
+                          {translate("{count} 个证据", {
+                            count: t.artifactIds.length,
+                          })}
                         </div>
                       </div>
                     ))}
@@ -1426,11 +1518,11 @@ function Studio({ logout }: { logout: () => void }) {
         )}
         {workspace && view === "runs" && (
           <section className="content-panel">
-            <QueryFeedback query={runs} label="运行记录" />
+            <QueryFeedback query={runs} label={translate("运行记录")} />
             {runs.data?.items.length === 0 && (
               <Empty
-                title="还没有运行记录"
-                text="成员开始执行任务后，状态与事件将显示在这里。"
+                title={translate("还没有运行记录")}
+                text={translate("成员开始执行任务后，状态与事件将显示在这里。")}
               />
             )}
             {runs.data?.items.map((r: Item) => (
@@ -1441,15 +1533,15 @@ function Studio({ logout }: { logout: () => void }) {
               >
                 <span>{agents.find((a) => a.id === r.agentId)?.name}</span>
                 <span className={"tag state-" + r.state}>
-                  {labels[r.state] ?? r.state}
+                  {translate(labels[r.state] ?? r.state)}
                 </span>
                 <time>
                   {r.startedAt
-                    ? new Date(r.startedAt).toLocaleString()
-                    : "等待派发"}
+                    ? new Date(r.startedAt).toLocaleString(getLocale())
+                    : translate("等待派发")}
                 </time>
                 <span className="row-link">
-                  查看轨迹
+                  {translate("查看轨迹")}
                   <Icon name="arrow" />
                 </span>
               </button>
@@ -1457,7 +1549,7 @@ function Studio({ logout }: { logout: () => void }) {
             {runId && (
               <div className="trace">
                 <div className="trace-header">
-                  <h3>运行轨迹</h3>
+                  <h3>{translate("运行轨迹")}</h3>
                   <button
                     onClick={() =>
                       void act(`/runs/${runId}/control`, {
@@ -1466,7 +1558,7 @@ function Studio({ logout }: { logout: () => void }) {
                       })
                     }
                   >
-                    请求中断
+                    {translate("请求中断")}
                   </button>
                   <button
                     onClick={() =>
@@ -1476,7 +1568,7 @@ function Studio({ logout }: { logout: () => void }) {
                       })
                     }
                   >
-                    核实状态
+                    {translate("核实状态")}
                   </button>
                 </div>
                 {trace.data?.items.map((r: Item) => (
@@ -1484,7 +1576,9 @@ function Studio({ logout }: { logout: () => void }) {
                     <summary>
                       {r.kind}{" "}
                       <small>
-                        {r.lane.length ? r.lane.join(" / ") : "根回合"}
+                        {r.lane.length
+                          ? r.lane.join(" / ")
+                          : translate("根回合")}
                       </small>
                     </summary>
                     <pre>{JSON.stringify(r.payload, null, 2)}</pre>
@@ -1496,13 +1590,13 @@ function Studio({ logout }: { logout: () => void }) {
         )}
         {workspace && view === "approvals" && (
           <section className="content-panel">
-            <QueryFeedback query={snapshot} label="审批" />
+            <QueryFeedback query={snapshot} label={translate("审批")} />
             {approvals.length === 0 &&
             !snapshot.isPending &&
             !snapshot.isError ? (
               <Empty
-                title="没有待处理的审批"
-                text="需要你的决定时，原版请求会出现在这里。"
+                title={translate("没有待处理的审批")}
+                text={translate("需要你的决定时，原版请求会出现在这里。")}
               />
             ) : (
               approvals.map((a: Item) => (
@@ -1517,11 +1611,13 @@ function Studio({ logout }: { logout: () => void }) {
         )}
         {workspace && view === "memory" && (
           <section className="content-panel">
-            <QueryFeedback query={memory} label="共享记忆" />
+            <QueryFeedback query={memory} label={translate("共享记忆")} />
             {memory.data?.items.length === 0 && (
               <Empty
-                title="还没有共享记忆"
-                text="Agent 提交的提案经过你的接受后，才会进入共享上下文。"
+                title={translate("还没有共享记忆")}
+                text={translate(
+                  "Agent 提交的提案经过你的接受后，才会进入共享上下文。",
+                )}
               />
             )}
             {memory.data?.items.map((m: Item) => (
@@ -1534,7 +1630,10 @@ function Studio({ logout }: { logout: () => void }) {
                   </ReactMarkdown>
                 </div>
                 <small>
-                  {m.sourceMessageIds.length} 条来源 · v{m.version}
+                  {translate("{count} 条来源 · v{version}", {
+                    count: m.sourceMessageIds.length,
+                    version: m.version,
+                  })}
                 </small>
                 {m.status === "proposed" && (
                   <button
@@ -1545,7 +1644,7 @@ function Studio({ logout }: { logout: () => void }) {
                       })
                     }
                   >
-                    接受提案
+                    {translate("接受提案")}
                   </button>
                 )}
               </article>
@@ -1555,12 +1654,12 @@ function Studio({ logout }: { logout: () => void }) {
         {workspace && view === "hosts" && <Hosts />}
       </main>
       {selected && (
-        <aside className="inspector" aria-label="成员详情">
+        <aside className="inspector" aria-label={translate("成员详情")}>
           <div className="inspector-heading">
-            <span>成员详情</span>
+            <span>{translate("成员详情")}</span>
             <button
               className="icon-button"
-              aria-label="关闭成员详情"
+              aria-label={translate("关闭成员详情")}
               onClick={() => setSelected(null)}
             >
               <Icon name="close" />
@@ -1574,36 +1673,36 @@ function Studio({ logout }: { logout: () => void }) {
           </span>
           <p>{selected.role}</p>
           <div className="member-directory">
-            <span>工作目录</span>
+            <span>{translate("工作目录")}</span>
             <code>
               {projects.data?.items.find(
                 (p: Item) => p.id === selected.projectId,
-              )?.rootPath ?? "未读取"}
+              )?.rootPath ?? translate("未读取")}
             </code>
             <span className="hint">
               {projects.data?.items.find(
                 (p: Item) => p.id === selected.projectId,
               )?.workspaceMode === "git-worktree"
-                ? "Git 工作副本"
-                : "直接在此文件夹工作"}
+                ? translate("Git 工作副本")
+                : translate("直接在此文件夹工作")}
             </span>
           </div>
           <dl>
-            <dt>模型</dt>
+            <dt>{translate("模型")}</dt>
             <dd>
               {selected.runtime.model === "default"
-                ? "沿用 CLI 配置"
+                ? translate("沿用 CLI 配置")
                 : selected.runtime.model}
             </dd>
-            <dt>权限</dt>
+            <dt>{translate("权限")}</dt>
             <dd>{permissionLabel(selected.runtime.permissionProfile)}</dd>
             <dt>Computer Use</dt>
             <dd>
               {["auto-approve", "full-access"].includes(
                 selected.runtime.permissionProfile,
               ) && selected.capabilities.includes("desktop.request")
-                ? "开启"
-                : "关闭"}
+                ? translate("开启")
+                : translate("关闭")}
             </dd>
           </dl>
           <AgentEditor
@@ -1633,14 +1732,16 @@ function QueryFeedback({
   if (query.isPending)
     return (
       <div className="inline-state" role="status">
-        正在读取{label}…
+        {translate("正在读取{label}…", { label })}
       </div>
     );
   if (query.isError)
     return (
       <div className="inline-state error" role="alert">
-        {label}读取失败，请检查连接。
-        <button onClick={() => void query.refetch()}>重试</button>
+        {translate("{label}读取失败，请检查连接。", { label })}
+        <button onClick={() => void query.refetch()}>
+          {translate("重试")}
+        </button>
       </div>
     );
   return null;
@@ -1673,7 +1774,7 @@ function AgentEditor({
   return (
     <>
       <details className="agent-editor">
-        <summary>编辑成员配置</summary>
+        <summary>{translate("编辑成员配置")}</summary>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
@@ -1696,10 +1797,12 @@ function AgentEditor({
           }}
         >
           <p className="hint">
-            配置保存后，在下一次执行时生效。正在执行时需等待本轮完成。
+            {translate(
+              "配置保存后，在下一次执行时生效。正在执行时需等待本轮完成。",
+            )}
           </p>
           <label>
-            名称
+            {translate("名称")}
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -1707,7 +1810,7 @@ function AgentEditor({
             />
           </label>
           <label>
-            职责
+            {translate("职责")}
             <textarea
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -1715,11 +1818,11 @@ function AgentEditor({
             />
           </label>
           <label>
-            模型
+            {translate("模型")}
             <input
               value={model === "default" ? "" : model}
               onChange={(e) => setModel(e.target.value || "default")}
-              placeholder="使用 CLI 配置的模型"
+              placeholder={translate("使用 CLI 配置的模型")}
             />
           </label>
           <PermissionField
@@ -1743,16 +1846,18 @@ function AgentEditor({
               busy || !["stopped", "idle"].includes(agent.observedState)
             }
           >
-            保存配置
+            {translate("保存配置")}
           </button>
         </form>
       </details>
       <div className="agent-delete">
         {confirmDelete ? (
-          <div role="group" aria-label="确认删除成员">
-            <p>删除「{agent.name}」？</p>
+          <div role="group" aria-label={translate("确认删除成员")}>
+            <p>{translate("删除「{name}」？", { name: agent.name })}</p>
             <p className="hint">
-              会从所有对话中移除此成员。历史消息、运行记录和工作文件保留。
+              {translate(
+                "会从所有对话中移除此成员。历史消息、运行记录和工作文件保留。",
+              )}
             </p>
             <div className="agent-delete-actions">
               <button
@@ -1760,7 +1865,7 @@ function AgentEditor({
                 disabled={busy}
                 onClick={() => setConfirmDelete(false)}
               >
-                取消
+                {translate("取消")}
               </button>
               <button
                 type="button"
@@ -1775,7 +1880,7 @@ function AgentEditor({
                   }
                 }}
               >
-                {busy ? "正在删除…" : "确认删除"}
+                {busy ? translate("正在删除…") : translate("确认删除")}
               </button>
             </div>
           </div>
@@ -1786,7 +1891,7 @@ function AgentEditor({
             disabled={busy}
             onClick={() => setConfirmDelete(true)}
           >
-            删除成员
+            {translate("删除成员")}
           </button>
         )}
       </div>
@@ -1813,8 +1918,10 @@ function Approval({
       {a.source === "computer-use" ? (
         <p>
           {a.display?._meta?.tool_params?.app
-            ? `请求操作应用：${a.display._meta.tool_params.app}`
-            : "电脑操作需要你的批准。"}
+            ? translate("请求操作应用：{v0}", {
+                v0: a.display._meta.tool_params.app,
+              })
+            : translate("电脑操作需要你的批准。")}
         </p>
       ) : (
         <pre>{JSON.stringify(a.display, null, 2)}</pre>
@@ -1831,7 +1938,7 @@ function Approval({
           Object.keys(a.inputSchema?.properties ?? {}).length === 0
         ) && (
           <label>
-            响应内容
+            {translate("响应内容")}
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -1841,14 +1948,14 @@ function Approval({
       {a.source === "computer-use" &&
         a.display?._meta?.persist?.includes("session") && (
           <label>
-            应用授权时长
+            {translate("应用授权时长")}
             <select value={scope} onChange={(e) => setScope(e.target.value)}>
-              <option value="once">仅这次操作</option>
-              <option value="session">当前电脑操作会话</option>
+              <option value="once">{translate("仅这次操作")}</option>
+              <option value="session">{translate("当前电脑操作会话")}</option>
             </select>
           </label>
         )}
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error">{translateError(error)}</p>}
       <div>
         {["approve", "deny", "cancel"]
           .filter((action) => a.allowedActions.includes(action))
@@ -1877,11 +1984,11 @@ function Approval({
             >
               {action === "approve"
                 ? scope === "session"
-                  ? "允许当前会话"
-                  : "允许一次"
+                  ? translate("允许当前会话")
+                  : translate("允许一次")
                 : action === "deny"
-                  ? "拒绝"
-                  : "取消"}
+                  ? translate("拒绝")
+                  : translate("取消")}
             </button>
           ))}
       </div>
@@ -1892,11 +1999,13 @@ function Hosts() {
   const hosts = useQuery({ queryKey: ["hosts"], queryFn: () => api("/hosts") });
   return (
     <section className="content-panel">
-      <QueryFeedback query={hosts} label="主机" />
+      <QueryFeedback query={hosts} label={translate("主机")} />
       {hosts.data?.items.length === 0 && (
         <Empty
-          title="尚未注册主机"
-          text="在执行电脑上运行 pnpm atrium-grove init，再启动 pnpm atrium-grove host start。"
+          title={translate("尚未注册主机")}
+          text={translate(
+            "在执行电脑上运行 pnpm atrium-grove init，再启动 pnpm atrium-grove host start。",
+          )}
         />
       )}
       {hosts.data?.items.map((h: Item) => (
@@ -1929,7 +2038,7 @@ function HostCard({ host: h }: { host: Item }) {
     try {
       const op = await api(`/hosts/${h.id}/desktop/control`, {
         action,
-        reason: "用户在执行电脑页面请求",
+        reason: translate("用户在执行电脑页面请求"),
       });
       setOperationId(op.id);
       await desktop.refetch();
@@ -1951,36 +2060,44 @@ function HostCard({ host: h }: { host: Item }) {
   return (
     <article className="host-card">
       <h2>{h.name}</h2>
-      {h.state !== "online" && <p className="error">执行服务离线</p>}
+      {h.state !== "online" && (
+        <p className="error">{translate("执行服务离线")}</p>
+      )}
       <h3>Computer Use</h3>
       <p className="muted">
-        在成员配置中单独开启，需要 Auto Approve 或 Full Access。
+        {translate("在成员配置中单独开启，需要 Auto Approve 或 Full Access。")}
       </p>
       <p>
         {(
           {
-            unavailable: "尚未就绪",
-            free: "空闲",
-            held: "正在操作电脑",
-            draining: "正在停止并释放桌面",
-            quarantined: "桌面释放未确认",
+            unavailable: translate("尚未就绪"),
+            free: translate("空闲"),
+            held: translate("正在操作电脑"),
+            draining: translate("正在停止并释放桌面"),
+            quarantined: translate("桌面释放未确认"),
           } as Record<string, string>
-        )[desktop.data?.state] ?? "正在读取状态…"}
+        )[desktop.data?.state] ?? translate("正在读取状态…")}
       </p>
       <p className="muted">
         {desktop.data?.provider === "disabled"
-          ? "尚未配置电脑操作组件。请在执行电脑上运行 pnpm exec tsx scripts/setup-computer.ts。"
+          ? translate(
+              "尚未配置电脑操作组件。请在执行电脑上运行 pnpm exec tsx scripts/setup-computer.ts。",
+            )
           : desktop.data?.diagnostic}
       </p>
       {desktop.data?.ownerRunId && (
         <p>
-          当前成员：{owner.data?.name ?? "正在读取…"} ·{" "}
-          {desktop.data.inFlightCalls} 项操作进行中
+          {translate("当前成员：{name} · {count} 项操作进行中", {
+            name: owner.data?.name ?? translate("正在读取…"),
+            count: desktop.data.inFlightCalls,
+          })}
         </p>
       )}
       {desktop.data?.state === "quarantined" && (
         <p className="muted">
-          未收到原组件的释放确认前，不会让其他成员接管。重新检查不会强制解除占用。
+          {translate(
+            "未收到原组件的释放确认前，不会让其他成员接管。重新检查不会强制解除占用。",
+          )}
         </p>
       )}
       <div className="desktop-controls">
@@ -1988,39 +2105,39 @@ function HostCard({ host: h }: { host: Item }) {
           disabled={busy || !["held", "draining"].includes(desktop.data?.state)}
           onClick={() => void control("stop")}
         >
-          停止当前电脑操作
+          {translate("停止当前电脑操作")}
         </button>
         {desktop.data?.state === "quarantined" && (
           <button
             disabled={busy}
             onClick={() => void control("clear_quarantine")}
           >
-            重新确认释放
+            {translate("重新确认释放")}
           </button>
         )}
         <button disabled={busy} onClick={() => void desktop.refetch()}>
-          刷新状态
+          {translate("刷新状态")}
         </button>
       </div>
       {operation.data && (
         <p role="status">
           {(
             {
-              pending: "等待执行电脑响应…",
-              running: "正在处理…",
-              completed: "请求已处理",
-              failed: "请求失败",
-              unknown: "结果尚未确认",
+              pending: translate("等待执行电脑响应…"),
+              running: translate("正在处理…"),
+              completed: translate("请求已处理"),
+              failed: translate("请求失败"),
+              unknown: translate("结果尚未确认"),
             } as Record<string, string>
-          )[operation.data.state] ?? "正在处理…"}
+          )[operation.data.state] ?? translate("正在处理…")}
           {operation.data.error?.message
-            ? `：${operation.data.error.message}`
+            ? ` · ${apiErrorMessage(operation.data.error)}`
             : ""}
         </p>
       )}
-      {error && <p className="error">{error}</p>}
+      {error && <p className="error">{translateError(error)}</p>}
       <details className="host-components">
-        <summary>组件信息</summary>
+        <summary>{translate("组件信息")}</summary>
         <p className="muted">
           {h.platform} / {h.architecture}
         </p>
@@ -2029,7 +2146,7 @@ function HostCard({ host: h }: { host: Item }) {
             <strong>
               {e.driver === "codex-app-server" ? "Codex" : "Claude Code"}
             </strong>
-            <span>{e.version ?? "不可用"}</span>
+            <span>{e.version ?? translate("不可用")}</span>
             {!e.available && <small>{e.diagnostic}</small>}
           </div>
         ))}

@@ -1,3 +1,4 @@
+import { translate } from "./i18n.js";
 import { useId } from "react";
 export const permissionOptions = [
   { value: "read-only", label: "Read Only", detail: "只读文件，不执行修改。" },
@@ -36,7 +37,7 @@ export function PermissionField({
   const id = useId();
   return (
     <fieldset className="permission-field">
-      <legend>权限模式</legend>
+      <legend>{translate("权限模式")}</legend>
       <div className="permission-options">
         {permissionOptions.map((option) => (
           <label
@@ -57,10 +58,10 @@ export function PermissionField({
         ))}
       </div>
       <p className="hint">
-        {
+        {translate(
           permissionOptions.find((p) => p.value === normalizedPermission(value))
-            ?.detail
-        }
+            ?.detail ?? "",
+        )}
       </p>
     </fieldset>
   );

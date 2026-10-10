@@ -1,3 +1,4 @@
+import { translate } from "./i18n.js";
 export const capabilityGroups = [
   {
     title: "对话",
@@ -41,10 +42,10 @@ export function CapabilityField({
 }) {
   return (
     <details className="capability-picker">
-      <summary>协作权限</summary>
+      <summary>{translate("协作权限")}</summary>
       {capabilityGroups.map((group) => (
-        <fieldset key={group.title}>
-          <legend>{group.title}</legend>
+        <fieldset key={translate(group.title)}>
+          <legend>{translate(group.title)}</legend>
           {group.options.map(([id, label, description]) => (
             <label key={id} className="capability-option">
               <input
@@ -59,8 +60,8 @@ export function CapabilityField({
                 }
               />
               <span>
-                <strong>{label}</strong>
-                <small>{description}</small>
+                <strong>{translate(label!)}</strong>
+                <small>{translate(description!)}</small>
               </span>
             </label>
           ))}
@@ -98,8 +99,8 @@ export function ComputerUseField({
         <strong>Computer Use</strong>
         <small>
           {eligible
-            ? "允许此成员操作电脑。默认关闭，应用授权仍由你确认。"
-            : "切换为 Auto Approve 或 Full Access 后可开启。"}
+            ? translate("允许此成员操作电脑。默认关闭，应用授权仍由你确认。")
+            : translate("切换为 Auto Approve 或 Full Access 后可开启。")}
         </small>
       </span>
     </label>

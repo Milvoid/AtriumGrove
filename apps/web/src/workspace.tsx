@@ -1,3 +1,4 @@
+import { translate, translateError } from "./i18n.js";
 import {
   defaultCapabilities,
   CapabilityField,
@@ -38,7 +39,7 @@ export function Modal({
         <button
           type="button"
           className="icon-button"
-          aria-label="关闭"
+          aria-label={translate("关闭对话框")}
           onClick={close}
         >
           <Icon name="close" />
@@ -77,13 +78,13 @@ export function DirectoryPicker({
   return (
     <>
       <label>
-        本机工作目录
+        {translate("本机工作目录")}
         <div className="directory-field">
           <input
-            aria-label="本机工作目录"
+            aria-label={translate("本机工作目录")}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="选择或填写文件夹路径"
+            placeholder={translate("选择或填写文件夹路径")}
             required
           />
           <button
@@ -94,15 +95,15 @@ export function DirectoryPicker({
               setOpen(true);
             }}
           >
-            浏览…
+            {translate("浏览…")}
           </button>
         </div>
       </label>
       {open && (
-        <Modal title="选择工作目录" close={() => setOpen(false)}>
+        <Modal title={translate("选择工作目录")} close={() => setOpen(false)}>
           <div className="directory-location">
             <input
-              aria-label="转到目录"
+              aria-label={translate("转到目录")}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -113,16 +114,16 @@ export function DirectoryPicker({
               }}
             />
             <button type="button" onClick={() => setPath(input)}>
-              转到
+              {translate("转到")}
             </button>
           </div>
           {dir.isError && (
             <p role="alert" className="error">
-              {(dir.error as Error).message}
+              {translateError((dir.error as Error).message)}
             </p>
           )}
           {dir.isPending ? (
-            <p>正在读取目录…</p>
+            <p>{translate("正在读取目录…")}</p>
           ) : (
             dir.data && (
               <>
@@ -132,7 +133,7 @@ export function DirectoryPicker({
                     disabled={!dir.data.parent}
                     onClick={() => setPath(dir.data.parent)}
                   >
-                    上一级
+                    {translate("上一级")}
                   </button>
                 </div>
                 <div className="directory-list">
@@ -148,17 +149,19 @@ export function DirectoryPicker({
                     </button>
                   ))}
                   {!dir.data.entries.length && (
-                    <p className="muted">没有子文件夹</p>
+                    <p className="muted">{translate("没有子文件夹")}</p>
                   )}
                   {dir.data.truncated && (
                     <p className="muted">
-                      仅显示前 500 个文件夹，可在上方输入完整路径。
+                      {translate(
+                        "仅显示前 500 个文件夹，可在上方输入完整路径。",
+                      )}
                     </p>
                   )}
                 </div>
                 <div className="form-actions">
                   <button type="button" onClick={() => setOpen(false)}>
-                    取消
+                    {translate("取消")}
                   </button>
                   <button
                     type="button"
@@ -169,7 +172,7 @@ export function DirectoryPicker({
                       setOpen(false);
                     }}
                   >
-                    使用此目录
+                    {translate("使用此目录")}
                   </button>
                 </div>
               </>
@@ -242,12 +245,12 @@ export function ProjectForm({
         if (["failed", "unknown"].includes(result.state)) {
           pendingInit.current = null;
           throw new Error(
-            result.error?.message ?? "初始化未完成，请检查运行记录",
+            result.error?.message ?? translate("初始化未完成，请检查运行记录"),
           );
         }
         await new Promise((resolve) => setTimeout(resolve, 500));
       }
-      throw new Error("初始化仍在执行，点击检查进度继续查看");
+      throw new Error(translate("初始化仍在执行，点击检查进度继续查看"));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -267,7 +270,7 @@ export function ProjectForm({
           );
           if (useGit && !listing.git?.hasCommit)
             throw new Error(
-              "请先初始化 Git 并创建首次提交，或取消 Git 工作模式",
+              translate("请先初始化 Git 并创建首次提交，或取消 Git 工作模式"),
             );
           const p = await api(`/workspaces/${workspace}/projects`, {
             name: listing.path.split("/").pop() || listing.path,
@@ -290,7 +293,7 @@ export function ProjectForm({
       <fieldset disabled={busy || initializing} className="project-fields">
         {hosts.data?.items.length > 1 && (
           <label>
-            执行电脑
+            {translate("执行电脑")}
             <select
               value={hostId}
               onChange={(e) => {
@@ -300,7 +303,7 @@ export function ProjectForm({
               }}
               required
             >
-              <option value="">选择电脑</option>
+              <option value="">{translate("选择电脑")}</option>
               {hosts.data?.items.map((h: Item) => (
                 <option key={h.id} value={h.id}>
                   {h.name}
@@ -324,34 +327,43 @@ export function ProjectForm({
             checked={useGit}
             onChange={(e) => setUseGit(e.target.checked)}
           />
-          Git 工作模式
+          {translate("Git 工作模式")}
         </label>
       </fieldset>
       {!useGit && (
         <p className="hint">
-          直接在所选文件夹工作。多个成员共享文件，不提供文件锁。
+          {translate("直接在所选文件夹工作。多个成员共享文件，不提供文件锁。")}
         </p>
       )}
       {useGit && (
         <div className="git-options">
           <p className="hint">
-            每个成员使用独立 Git 工作副本；源目录未提交的改动不会自动复制。
+            {translate(
+              "每个成员使用独立 Git 工作副本；源目录未提交的改动不会自动复制。",
+            )}
           </p>
           {!root ? (
-            <p className="hint">先选择工作目录。</p>
+            <p className="hint">{translate("先选择工作目录。")}</p>
           ) : git.isPending ? (
-            <p className="hint">正在查找 Git 仓库…</p>
+            <p className="hint">{translate("正在查找 Git 仓库…")}</p>
           ) : git.isError ? (
-            <p className="error">{(git.error as Error).message}</p>
+            <p className="error">
+              {translateError((git.error as Error).message)}
+            </p>
           ) : git.data?.git?.hasCommit ? (
             <p className="hint">
-              已关联：<code>{git.data.git.repositoryRoot}</code>
+              {translate("已关联：")}
+              <code>{git.data.git.repositoryRoot}</code>
             </p>
           ) : (
             <>
               <p className="hint">
-                {git.data?.git ? "此仓库还没有提交。" : "未找到 Git 仓库。"}
-                初始化会提交当前目录中未被 .gitignore 忽略的文件，不推送远端。
+                {git.data?.git
+                  ? translate("此仓库还没有提交。")
+                  : translate("未找到 Git 仓库。")}
+                {translate(
+                  "初始化会提交当前目录中未被 .gitignore 忽略的文件，不推送远端。",
+                )}
               </p>
               <button
                 type="button"
@@ -359,10 +371,10 @@ export function ProjectForm({
                 onClick={() => void initialize()}
               >
                 {initializing
-                  ? "正在初始化…"
+                  ? translate("正在初始化…")
                   : pendingInit.current
-                    ? "检查进度"
-                    : "初始化 Git 并创建首次提交"}
+                    ? translate("检查进度")
+                    : translate("初始化 Git 并创建首次提交")}
               </button>
             </>
           )}
@@ -370,12 +382,14 @@ export function ProjectForm({
       )}
       {changedMode && (
         <p className="hint">
-          这会切换此目录所有成员的工作方式。请先停止成员；已有工作副本会保留，下次启动使用新会话。
+          {translate(
+            "这会切换此目录所有成员的工作方式。请先停止成员；已有工作副本会保留，下次启动使用新会话。",
+          )}
         </p>
       )}
       {error && (
         <p role="alert" className="error">
-          {error}
+          {translateError(error)}
         </p>
       )}
       <button
@@ -388,7 +402,11 @@ export function ProjectForm({
           (useGit && !git.data?.git?.hasCommit)
         }
       >
-        {busy ? "正在保存…" : existing ? "保存工作目录" : "使用此目录"}
+        {busy
+          ? translate("正在保存…")
+          : existing
+            ? translate("保存工作目录")
+            : translate("使用此目录")}
       </button>
     </form>
   );
@@ -414,7 +432,7 @@ export function WorkspaceForm({
         try {
           const id = created.current ?? (await api("/workspaces", { name })).id;
           created.current = id;
-          await api(`/workspaces/${id}/channels`, { name: "讨论" });
+          await api(`/workspaces/${id}/channels`, { name: translate("讨论") });
           done(id);
         } catch (e) {
           setError((e as Error).message);
@@ -424,7 +442,7 @@ export function WorkspaceForm({
       }}
     >
       <label>
-        项目名称
+        {translate("项目名称")}
         <input
           autoFocus
           required
@@ -434,11 +452,11 @@ export function WorkspaceForm({
       </label>
       {error && (
         <p role="alert" className="error">
-          {error}
+          {translateError(error)}
         </p>
       )}
       <button className="primary" disabled={busy}>
-        {busy ? "正在创建…" : "创建项目"}
+        {busy ? translate("正在创建…") : translate("创建项目")}
       </button>
     </form>
   );
@@ -478,7 +496,7 @@ export function MemberForm({
         setError("");
         try {
           const p = projects.find((x) => x.id === project);
-          if (!p) throw new Error("请先添加工作目录");
+          if (!p) throw new Error(translate("请先添加工作目录"));
           const a =
             created.current ??
             (await api(`/workspaces/${workspace}/agents`, {
@@ -519,7 +537,7 @@ export function MemberForm({
       }}
     >
       <label>
-        名称
+        {translate("名称")}
         <input
           autoFocus
           value={name}
@@ -537,22 +555,22 @@ export function MemberForm({
           </select>
         </label>
         <label>
-          模型
+          {translate("模型")}
           <input
             value={model === "default" ? "" : model}
             onChange={(e) => setModel(e.target.value || "default")}
-            placeholder="使用 CLI 配置的模型"
+            placeholder={translate("使用 CLI 配置的模型")}
           />
         </label>
       </div>
       <label>
-        工作目录
+        {translate("工作目录")}
         <select
           value={project}
           onChange={(e) => setProject(e.target.value)}
           required
         >
-          <option value="">选择目录</option>
+          <option value="">{translate("选择目录")}</option>
           {projects.map((p) => (
             <option key={p.id} value={p.id}>
               {p.rootPath}
@@ -561,12 +579,12 @@ export function MemberForm({
         </select>
       </label>
       <label>
-        职责
+        {translate("职责")}
         <textarea
           value={role}
           onChange={(e) => setRole(e.target.value)}
           required
-          placeholder="例如：实现功能、运行测试、审查改动"
+          placeholder={translate("例如：实现功能、运行测试、审查改动")}
           rows={2}
         />
       </label>
@@ -593,17 +611,21 @@ export function MemberForm({
             checked={join}
             onChange={(e) => setJoin(e.target.checked)}
           />
-          加入当前对话
+          {translate("加入当前对话")}
         </label>
       )}
 
       {error && (
         <p role="alert" className="error">
-          {error}
+          {translateError(error)}
         </p>
       )}
       <button className="primary" disabled={busy || !projects.length}>
-        {busy ? "正在创建…" : created.current ? "重试加入对话" : "创建成员"}
+        {busy
+          ? translate("正在创建…")
+          : created.current
+            ? translate("重试加入对话")
+            : translate("创建成员")}
       </button>
     </form>
   );
@@ -664,13 +686,17 @@ export function ChannelMembers({
         disabled={!q.data || busy}
       />
       <p className="hint">
-        取消勾选后不再接收此对话的新工作；已开始的一轮会继续完成。
+        {translate(
+          "取消勾选后不再接收此对话的新工作；已开始的一轮会继续完成。",
+        )}
       </p>
       {(error || q.isError) && (
-        <p className="error">{error || (q.error as Error).message}</p>
+        <p className="error">
+          {translateError(error || (q.error as Error).message)}
+        </p>
       )}
       <button className="primary" disabled={busy || !q.data}>
-        保存参与者
+        {translate("保存参与者")}
       </button>
     </form>
   );
@@ -691,7 +717,7 @@ function ParticipantChoices({
 }) {
   return (
     <fieldset className="participant-choices" disabled={disabled}>
-      <legend>参与成员</legend>
+      <legend>{translate("参与成员")}</legend>
       {agents.map((a) => (
         <label key={a.id} className="participant-choice">
           <input
@@ -717,7 +743,9 @@ function ParticipantChoices({
         </label>
       ))}
       {!agents.length && (
-        <p className="muted">尚无成员，可先创建对话，稍后添加成员。</p>
+        <p className="muted">
+          {translate("尚无成员，可先创建对话，稍后添加成员。")}
+        </p>
       )}
     </fieldset>
   );
@@ -761,7 +789,7 @@ export function ChannelForm({
       }}
     >
       <label>
-        对话名称
+        {translate("对话名称")}
         <input
           autoFocus
           value={name}
@@ -779,11 +807,11 @@ export function ChannelForm({
       />
       {error && (
         <p className="error" role="alert">
-          {error}
+          {translateError(error)}
         </p>
       )}
       <button className="primary" disabled={busy || !name.trim()}>
-        {busy ? "正在创建…" : "创建对话"}
+        {busy ? translate("正在创建…") : translate("创建对话")}
       </button>
     </form>
   );

@@ -1,3 +1,4 @@
+import { translate } from "./i18n.js";
 export type TraceRecord = {
   id: string;
   launchId: string;
@@ -117,7 +118,9 @@ export function toolTitle(item: Activity) {
       p.tool ??
       p.changes?.map((c: any) => c.path).join(", ");
   return [
-    names[item.name ?? ""] ?? item.name ?? "工具",
+    names[item.name ?? ""]
+      ? translate(names[item.name ?? ""]!)
+      : (item.name ?? translate("工具")),
     typeof detail === "string" ? detail : "",
   ]
     .filter(Boolean)
@@ -125,14 +128,16 @@ export function toolTitle(item: Activity) {
 }
 
 export function pendingActivityLabel(item: Record<string, any>) {
-  if (item.hostState !== "online") return "执行服务离线，消息尚未开始处理";
+  if (item.hostState !== "online")
+    return translate("执行服务离线，消息尚未开始处理");
   if (["unknown", "degraded", "failed"].includes(item.agentState))
-    return "会话连接异常，消息尚未开始处理";
+    return translate("会话连接异常，消息尚未开始处理");
   if (item.episodeState === "paused_budget")
-    return "本轮达到执行上限，后续回复已暂停";
-  if (item.episodeState !== "open") return "本轮已暂停，消息尚未开始处理";
-  if (item.busy) return "等待该成员完成上一项任务";
+    return translate("本轮达到执行上限，后续回复已暂停");
+  if (item.episodeState !== "open")
+    return translate("本轮已暂停，消息尚未开始处理");
+  if (item.busy) return translate("等待该成员完成上一项任务");
   if (["starting", "recovering"].includes(item.agentState))
-    return "正在连接模型…";
-  return "等待成员开始处理…";
+    return translate("正在连接模型…");
+  return translate("等待成员开始处理…");
 }

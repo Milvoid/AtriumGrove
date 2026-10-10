@@ -1,3 +1,4 @@
+import { translate } from "./i18n.js";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 export function newId() {
   const b = crypto.getRandomValues(new Uint8Array(16));
@@ -7,6 +8,12 @@ export function newId() {
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 const paths: Record<string, ReactNode> = {
+  language: (
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18M12 3a17 17 0 0 1 0 18 17 17 0 0 1 0-18Z" />
+    </>
+  ),
   folder: (
     <path d="M3 8V6a2 2 0 0 1 2-2h4.2a2 2 0 0 1 1.4.6L13 7h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0h8" />
   ),
@@ -160,7 +167,7 @@ export function useDialog() {
           <button
             type="button"
             className="icon-button"
-            aria-label="关闭弹窗"
+            aria-label={translate("关闭弹窗")}
             onClick={() => finish(null)}
           >
             <Icon name="close" />
@@ -180,9 +187,11 @@ export function useDialog() {
         )}
         <div className="form-actions">
           <button type="button" onClick={() => finish(null)}>
-            取消
+            {translate("取消")}
           </button>
-          <button className="primary">{config?.input ? "保存" : "确认"}</button>
+          <button className="primary">
+            {config?.input ? translate("保存") : translate("确认")}
+          </button>
         </div>
       </form>
     </dialog>

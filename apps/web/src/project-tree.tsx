@@ -1,3 +1,4 @@
+import { translate } from "./i18n.js";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "./ui.js";
@@ -39,7 +40,10 @@ export function ProjectTree({
             <div className="project-tree-heading">
               <button
                 className="project-tree-toggle"
-                aria-label={`${expanded ? "收起" : "展开"}${name}`}
+                aria-label={translate(
+                  expanded ? "收起 {name}" : "展开 {name}",
+                  { name },
+                )}
                 aria-expanded={expanded}
                 aria-controls={`project-chats-${p.id}`}
                 onClick={() =>
@@ -60,7 +64,7 @@ export function ProjectTree({
               </button>
               <button
                 className="project-tree-add"
-                aria-label={`在${name}中新建对话`}
+                aria-label={translate("在{v0}中新建对话", { v0: name })}
                 onClick={() => createChat(workspace.id, p.id)}
               >
                 <Icon name="plus" />
@@ -74,7 +78,10 @@ export function ProjectTree({
               id={`project-chats-${p.id}`}
             >
               <div className="project-tree-clip">
-                <nav className="project-chats" aria-label={`${name}的对话`}>
+                <nav
+                  className="project-chats"
+                  aria-label={translate("{v0}的对话", { v0: name })}
+                >
                   {children.map((c: Item) => (
                     <button
                       key={c.id}
@@ -105,7 +112,9 @@ export function ProjectTree({
           </button>
         ))}
       {chats.isError && (
-        <button onClick={() => void chats.refetch()}>对话读取失败，重试</button>
+        <button onClick={() => void chats.refetch()}>
+          {translate("对话读取失败，重试")}
+        </button>
       )}
     </>
   );
