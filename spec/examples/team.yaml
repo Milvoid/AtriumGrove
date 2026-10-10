@@ -1,0 +1,84 @@
+# Atrium Grove proposed import format 1.0, not an existing native Harness config.
+# `pnpm atrium-grove team import` must resolve ${NAME} from an explicit --vars JSON file,
+# not execute shell interpolation. Missing variables fail before creating agents.
+schemaVersion: 1
+workspace:
+  name: Research Council
+hostRef: local-mac
+project:
+  name: csv-lab
+  rootPath: "${PROJECT_ROOT}"
+  baseRef: HEAD
+policy:
+  maxRunning: 5
+  perDriverConcurrency:
+    codex-app-server: 3
+    claude-code-sdk: 2
+  episode:
+    maxNativeTurns: 32
+    maxDepth: 8
+    maxAgentFanout: 3
+    wallTimeSec: 3600
+    softTokenLimit: null
+  idleRecycleMinutes: 20
+  autoResumeMissingTranscript: false
+  sharedVisibility: workspace
+computer:
+  provider: lcu
+  profileRef: local-lcu-qualified
+  requireQualification: true
+  lease: whole-root-turn
+  allowProviderFallback: false
+channels:
+  - name: general
+    topic: 人类目标与跨专家协作
+    agents: [codex-researcher, codex-implementer, codex-desktop, claude-architect, claude-reviewer]
+  - name: implementation
+    topic: 任务、提交与审查证据
+    agents: [codex-implementer, claude-architect, claude-reviewer]
+agents:
+  - name: codex-researcher
+    role: 独立检查假设与边界，用可重复实验支持判断；不要预先附和其他专家。
+    runtime:
+      driver: codex-app-server
+      executableProfile: local-codex-qualified
+      model: "${CODEX_MODEL}"
+      permissionProfile: workspace
+      settingsProfile: project-reviewed
+    capabilities: [collab.read, collab.post, task.read, task.create, task.claim, task.transition, artifact.read, artifact.register, memory.propose]
+  - name: codex-implementer
+    role: 领取任务后在自己的worktree实现与测试，提交证据供独立审查。
+    runtime:
+      driver: codex-app-server
+      executableProfile: local-codex-qualified
+      model: "${CODEX_MODEL}"
+      permissionProfile: workspace
+      settingsProfile: project-reviewed
+    capabilities: [collab.read, collab.post, task.read, task.create, task.claim, task.transition, artifact.read, artifact.register, memory.propose]
+  - name: codex-desktop
+    role: 完成有明确目标的桌面验证；发布截图与观察事实，清理前不宣称桌面已停止。
+    runtime:
+      driver: codex-app-server
+      executableProfile: local-codex-qualified
+      model: "${CODEX_MODEL}"
+      permissionProfile: desktop
+      settingsProfile: project-reviewed
+    capabilities: [collab.read, collab.post, task.read, task.claim, task.transition, artifact.read, artifact.register, desktop.request]
+  - name: claude-architect
+    role: 设计组件边界和验收条件，异步征求同伴反例；共识须注明证据和不确定性。
+    runtime:
+      driver: claude-code-sdk
+      executableProfile: local-claude-qualified
+      model: "${CLAUDE_MODEL}"
+      permissionProfile: workspace
+      settingsProfile: project-reviewed
+    capabilities: [collab.read, collab.post, task.read, task.create, task.claim, task.transition, artifact.read, artifact.register, memory.propose]
+  - name: claude-reviewer
+    role: 基于固定commit、测试和截图独立审查。需要复现GUI问题时可申请桌面，但不得自批授权。
+    runtime:
+      driver: claude-code-sdk
+      executableProfile: local-claude-qualified
+      model: "${CLAUDE_MODEL}"
+      permissionProfile: desktop
+      settingsProfile: project-reviewed
+    capabilities: [collab.read, collab.post, task.read, task.transition, task.review, artifact.read, artifact.register, desktop.request, memory.propose]

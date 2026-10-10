@@ -1,0 +1,11 @@
+{
+  "version": "codex-cli 0.157.1",
+  "architecture": "darwin-arm64",
+  "generator": "codex app-server generate-json-schema",
+  "schemas": {
+    "TurnStartParams.json": "2dfcf68705896fadc344ccfeb2e9fe5a6bcbbb8b9a90cf449ce232b636daf05a",
+    "ThreadStartParams.json": "e9c6d3cc18d049bfbc0249add3808fb8e5a27e1a0b5a423767aafbc3859a9428",
+    "ThreadResumeParams.json": "c818e26d830ac4430791eab7d4a872d2384fa6006b14c505d8caf46e7e093527",
+    "TurnSteerParams.json": "857e7a2b061ae46ed6aedea6a5fddd3a6ce14f0334bf7eafaf10d4cbe68ec78b"
+  }
+}

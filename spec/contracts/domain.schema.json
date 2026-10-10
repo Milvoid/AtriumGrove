@@ -1,0 +1,3607 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harbor.local/contracts/domain.schema.json",
+  "title": "Atrium Grove 1.0 domain contracts",
+  "$defs": {
+    "Error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "retryable",
+        "requestId"
+      ],
+      "additionalProperties": false
+    },
+    "Actor": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "human",
+            "agent",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "displayName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "displayName"
+      ],
+      "additionalProperties": false
+    },
+    "TextBlock": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "text"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 65536
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "ArtifactBlock": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "artifact"
+        },
+        "artifactId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "caption": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "artifactId"
+      ],
+      "additionalProperties": false
+    },
+    "Block": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/TextBlock"
+        },
+        {
+          "$ref": "#/$defs/ArtifactBlock"
+        }
+      ]
+    },
+    "Budget": {
+      "type": "object",
+      "properties": {
+        "maxNativeTurns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "maxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "maxAgentFanout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
+        },
+        "wallTimeSec": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "softTokenLimit": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "maxNativeTurns",
+        "maxDepth",
+        "maxAgentFanout",
+        "wallTimeSec",
+        "softTokenLimit"
+      ],
+      "additionalProperties": false
+    },
+    "Workspace": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "archived"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "state",
+        "version",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    },
+    "CreateWorkspace": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "WorkspaceControl": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "pause",
+            "resume"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "action",
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "Host": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        },
+        "architecture": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "online",
+            "offline",
+            "degraded",
+            "revoked"
+          ]
+        },
+        "lastSeenAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bootId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "platform",
+        "architecture",
+        "state",
+        "lastSeenAt",
+        "bootId",
+        "capabilities"
+      ],
+      "additionalProperties": false
+    },
+    "PairHost": {
+      "type": "object",
+      "properties": {
+        "pairingCode": {
+          "type": "string"
+        },
+        "hostName": {
+          "type": "string"
+        },
+        "publicIdentity": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "pairingCode",
+        "hostName",
+        "publicIdentity"
+      ],
+      "additionalProperties": false
+    },
+    "HostEnrollment": {
+      "type": "object",
+      "properties": {
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "hostCredential": {
+          "type": "string"
+        },
+        "websocketPath": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "hostId",
+        "hostCredential",
+        "websocketPath"
+      ],
+      "additionalProperties": false
+    },
+    "Project": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rootPath": {
+          "type": "string"
+        },
+        "baseRef": {
+          "type": "string"
+        },
+        "workspaceMode": {
+          "type": "string",
+          "enum": [
+            "directory",
+            "git-worktree"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "hostId",
+        "name",
+        "rootPath",
+        "baseRef",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "CreateProject": {
+      "type": "object",
+      "properties": {
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "rootPath": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseRef": {
+          "type": "string"
+        },
+        "workspaceMode": {
+          "type": "string",
+          "enum": [
+            "directory",
+            "git-worktree"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "hostId",
+        "name",
+        "rootPath"
+      ],
+      "additionalProperties": false
+    },
+    "InitializeGit": {
+      "type": "object",
+      "properties": {
+        "rootPath": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "rootPath"
+      ],
+      "additionalProperties": false
+    },
+    "RuntimeConfig": {
+      "type": "object",
+      "properties": {
+        "driver": {
+          "type": "string",
+          "enum": [
+            "codex-app-server",
+            "claude-code-sdk"
+          ]
+        },
+        "executableProfile": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "effort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "permissionProfile": {
+          "type": "string",
+          "enum": [
+            "review",
+            "workspace",
+            "desktop",
+            "read-only",
+            "ask-for-approval",
+            "auto-approve",
+            "full-access"
+          ]
+        },
+        "settingsProfile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "driver",
+        "executableProfile",
+        "model",
+        "permissionProfile",
+        "settingsProfile"
+      ],
+      "additionalProperties": false
+    },
+    "Agent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeConfig"
+        },
+        "desiredState": {
+          "type": "string",
+          "enum": [
+            "running",
+            "paused",
+            "stopped"
+          ]
+        },
+        "observedState": {
+          "type": "string",
+          "enum": [
+            "stopped",
+            "starting",
+            "idle",
+            "working",
+            "waiting_approval",
+            "recovering",
+            "degraded",
+            "unknown"
+          ]
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "hostId",
+        "projectId",
+        "name",
+        "role",
+        "runtime",
+        "desiredState",
+        "observedState",
+        "capabilities",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "CreateAgent": {
+      "type": "object",
+      "properties": {
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "role": {
+          "type": "string"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeConfig"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "hostId",
+        "projectId",
+        "name",
+        "role",
+        "runtime"
+      ],
+      "additionalProperties": false
+    },
+    "AgentControl": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "start",
+            "pause",
+            "resume",
+            "stop",
+            "reset_session"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "DeleteAgent": {
+      "type": "object",
+      "properties": {
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "PatchAgent": {
+      "type": "object",
+      "properties": {
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "runtime": {
+          "$ref": "#/$defs/RuntimeConfig"
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "Session": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "driver": {
+          "type": "string"
+        },
+        "nativeSessionId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "launchId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "opening",
+            "ready",
+            "busy",
+            "waiting_approval",
+            "recovering",
+            "closed",
+            "failed",
+            "unknown"
+          ]
+        },
+        "workspacePath": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "channelId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "agentId",
+        "driver",
+        "nativeSessionId",
+        "launchId",
+        "generation",
+        "state",
+        "workspacePath",
+        "createdAt",
+        "channelId"
+      ],
+      "additionalProperties": false
+    },
+    "Channel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "name",
+        "topic",
+        "version",
+        "archived",
+        "projectId"
+      ],
+      "additionalProperties": false
+    },
+    "CreateChannel": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "topic": {
+          "type": "string"
+        },
+        "agentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "projectId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "Members": {
+      "type": "object",
+      "properties": {
+        "agentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "agentIds",
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "Thread": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "open",
+            "paused",
+            "closed"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "channelId",
+        "title",
+        "state",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    },
+    "CreateThread": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "PostMessage": {
+      "type": "object",
+      "properties": {
+        "threadId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "replyToMessageId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "recipientAgentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true,
+          "maxItems": 10
+        },
+        "requestResponse": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "message",
+            "progress",
+            "question",
+            "answer",
+            "proposal"
+          ]
+        },
+        "continuationEpisodeId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "clientMessageId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "blocks",
+        "recipientAgentIds",
+        "requestResponse",
+        "kind",
+        "clientMessageId"
+      ],
+      "additionalProperties": false
+    },
+    "StartConversation": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "message": {
+          "$ref": "#/$defs/PostMessage"
+        }
+      },
+      "required": [
+        "projectId",
+        "agentIds",
+        "message"
+      ],
+      "additionalProperties": false
+    },
+    "Message": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "threadId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "replyToMessageId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actor": {
+          "$ref": "#/$defs/Actor"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Block"
+          }
+        },
+        "recipientAgentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "requestResponse": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "message",
+            "progress",
+            "question",
+            "answer",
+            "proposal",
+            "system"
+          ]
+        },
+        "episodeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "seq": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "channelId",
+        "threadId",
+        "replyToMessageId",
+        "actor",
+        "blocks",
+        "recipientAgentIds",
+        "requestResponse",
+        "kind",
+        "episodeId",
+        "runId",
+        "seq",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    },
+    "Episode": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "rootMessageId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "open",
+            "paused_budget",
+            "paused_human",
+            "complete"
+          ]
+        },
+        "budget": {
+          "$ref": "#/$defs/Budget"
+        },
+        "nativeTurnsReserved": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "rootMessageId",
+        "state",
+        "budget",
+        "nativeTurnsReserved",
+        "version",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    },
+    "EpisodeControl": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "pause",
+            "continue",
+            "close"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "additionalTurns": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      },
+      "required": [
+        "action",
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "Task": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "threadId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceMessageId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "in_progress",
+            "blocked",
+            "in_review",
+            "done",
+            "cancelled"
+          ]
+        },
+        "assigneeAgentId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reviewerAgentId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "leaseEpoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "artifactIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "dependencyTaskIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "channelId",
+        "threadId",
+        "sourceMessageId",
+        "title",
+        "description",
+        "acceptanceCriteria",
+        "status",
+        "assigneeAgentId",
+        "reviewerAgentId",
+        "leaseEpoch",
+        "version",
+        "artifactIds",
+        "dependencyTaskIds"
+      ],
+      "additionalProperties": false
+    },
+    "CreateTask": {
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "threadId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceMessageId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "reviewerAgentId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dependencyTaskIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "required": [
+        "channelId",
+        "threadId",
+        "title",
+        "description",
+        "acceptanceCriteria"
+      ],
+      "additionalProperties": false
+    },
+    "ClaimTask": {
+      "type": "object",
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "agentId",
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "TaskTransition": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "blocked",
+            "in_review",
+            "done",
+            "cancelled"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "leaseEpoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        },
+        "artifactIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "required": [
+        "status",
+        "expectedVersion",
+        "leaseEpoch"
+      ],
+      "additionalProperties": false
+    },
+    "Run": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "episodeId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "taskId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "primaryMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "nativeTurnId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "scheduled",
+            "dispatching",
+            "running",
+            "waiting_approval",
+            "draining",
+            "completed",
+            "failed",
+            "interrupted",
+            "unknown"
+          ]
+        },
+        "nativeOutcome": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "completed",
+                "failed",
+                "interrupted"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "launchId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endedAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contextDigest": {
+          "type": "string"
+        },
+        "contextArtifactId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finalMessageId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "agentId",
+        "sessionId",
+        "episodeId",
+        "taskId",
+        "primaryMessageId",
+        "nativeTurnId",
+        "state",
+        "nativeOutcome",
+        "launchId",
+        "startedAt",
+        "endedAt",
+        "errorCode",
+        "contextDigest",
+        "contextArtifactId",
+        "finalMessageId"
+      ],
+      "additionalProperties": false
+    },
+    "RunControl": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "interrupt",
+            "steer",
+            "reconcile"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "clientMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "clientMessageId"
+      ],
+      "additionalProperties": false
+    },
+    "Delivery": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "messageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "reserved",
+            "sent",
+            "cancelled",
+            "unknown"
+          ]
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "transport_written",
+              "native_ack",
+              "context_included",
+              "agent_ack"
+            ]
+          }
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "agentId",
+        "messageId",
+        "runId",
+        "state",
+        "evidence",
+        "attempt",
+        "errorCode"
+      ],
+      "additionalProperties": false
+    },
+    "Approval": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "launchId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "codex",
+            "claude",
+            "computer-use"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "permission",
+            "question",
+            "form",
+            "url"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "approved",
+            "denied",
+            "cancelled",
+            "expired",
+            "resolved",
+            "unknown"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "inputSchema": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "display": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "allowedActions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "argumentHash": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expiresAt": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "agentId",
+        "runId",
+        "launchId",
+        "source",
+        "kind",
+        "state",
+        "title",
+        "inputSchema",
+        "display",
+        "allowedActions",
+        "argumentHash",
+        "version",
+        "expiresAt"
+      ],
+      "additionalProperties": false
+    },
+    "ResolveApproval": {
+      "type": "object",
+      "properties": {
+        "argumentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "approve",
+            "deny",
+            "cancel"
+          ]
+        },
+        "content": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "once",
+            "session"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "action",
+        "expectedVersion",
+        "argumentHash"
+      ],
+      "additionalProperties": false
+    },
+    "Artifact": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "file",
+            "image",
+            "diff",
+            "test_report",
+            "log",
+            "context"
+          ]
+        },
+        "filename": {
+          "type": "string"
+        },
+        "mimeType": {
+          "type": "string"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "creator": {
+          "$ref": "#/$defs/Actor"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "retentionClass": {
+          "type": "string",
+          "enum": [
+            "durable",
+            "screenshot",
+            "diagnostic"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "kind",
+        "filename",
+        "mimeType",
+        "sizeBytes",
+        "sha256",
+        "creator",
+        "createdAt",
+        "retentionClass"
+      ],
+      "additionalProperties": false
+    },
+    "Desktop": {
+      "type": "object",
+      "properties": {
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "provider": {
+          "type": "string",
+          "enum": [
+            "lcu",
+            "direct-mcp",
+            "mock",
+            "disabled"
+          ]
+        },
+        "qualified": {
+          "type": "boolean"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "unavailable",
+            "free",
+            "held",
+            "draining",
+            "quarantined"
+          ]
+        },
+        "leaseEpoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ownerAgentId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ownerRunId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inFlightCalls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "diagnostic": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "hostId",
+        "provider",
+        "qualified",
+        "state",
+        "leaseEpoch",
+        "ownerAgentId",
+        "ownerRunId",
+        "inFlightCalls",
+        "diagnostic"
+      ],
+      "additionalProperties": false
+    },
+    "DesktopControl": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "stop",
+            "clear_quarantine"
+          ]
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "action",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "Memory": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "agent",
+            "thread"
+          ]
+        },
+        "ownerId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "sourceMessageIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "proposed",
+            "accepted",
+            "superseded"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "id",
+        "workspaceId",
+        "scope",
+        "ownerId",
+        "title",
+        "body",
+        "sourceMessageIds",
+        "status",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "ProposeMemory": {
+      "type": "object",
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "agent",
+            "thread"
+          ]
+        },
+        "ownerId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "sourceMessageIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "scope",
+        "ownerId",
+        "title",
+        "body",
+        "sourceMessageIds"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryDecision": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "accept",
+            "supersede"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "action",
+        "expectedVersion"
+      ],
+      "additionalProperties": false
+    },
+    "RuntimeInventory": {
+      "type": "object",
+      "properties": {
+        "hostId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "driver": {
+                "type": "string"
+              },
+              "executableProfile": {
+                "type": "string"
+              },
+              "version": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "available": {
+                "type": "boolean"
+              },
+              "authenticated": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "models": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "diagnostic": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "driver",
+              "executableProfile",
+              "version",
+              "available",
+              "authenticated",
+              "models",
+              "features",
+              "diagnostic"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "hostId",
+        "entries"
+      ],
+      "additionalProperties": false
+    },
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "accepted",
+            "running",
+            "completed",
+            "failed",
+            "unknown"
+          ]
+        },
+        "result": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Error"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "state"
+      ],
+      "additionalProperties": false
+    },
+    "Event": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "seq": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "workspaceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "workspace.updated",
+            "host.updated",
+            "agent.updated",
+            "session.updated",
+            "channel.updated",
+            "thread.updated",
+            "message.created",
+            "delivery.updated",
+            "episode.updated",
+            "run.scheduled",
+            "run.updated",
+            "run.trace",
+            "task.created",
+            "task.claimed",
+            "task.updated",
+            "approval.updated",
+            "artifact.created",
+            "memory.updated",
+            "desktop.updated",
+            "operation.updated",
+            "diagnostic"
+          ]
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "actor": {
+          "$ref": "#/$defs/Actor"
+        },
+        "entityId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "eventId",
+        "seq",
+        "workspaceId",
+        "type",
+        "occurredAt",
+        "actor",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "workspace.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workspace": {
+                    "$ref": "#/$defs/Workspace"
+                  }
+                },
+                "required": [
+                  "workspace"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "host.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "$ref": "#/$defs/Host"
+                  }
+                },
+                "required": [
+                  "host"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "agent.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "agent": {
+                    "$ref": "#/$defs/Agent"
+                  }
+                },
+                "required": [
+                  "agent"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "session.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "session": {
+                    "$ref": "#/$defs/Session"
+                  }
+                },
+                "required": [
+                  "session"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "channel.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "$ref": "#/$defs/Channel"
+                  }
+                },
+                "required": [
+                  "channel"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "thread.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "thread": {
+                    "$ref": "#/$defs/Thread"
+                  }
+                },
+                "required": [
+                  "thread"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "message.created"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "$ref": "#/$defs/Message"
+                  }
+                },
+                "required": [
+                  "message"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "delivery.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "delivery": {
+                    "$ref": "#/$defs/Delivery"
+                  }
+                },
+                "required": [
+                  "delivery"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "episode.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "episode": {
+                    "$ref": "#/$defs/Episode"
+                  }
+                },
+                "required": [
+                  "episode"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "run.scheduled"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "run": {
+                    "$ref": "#/$defs/Run"
+                  }
+                },
+                "required": [
+                  "run"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "run.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "run": {
+                    "$ref": "#/$defs/Run"
+                  }
+                },
+                "required": [
+                  "run"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "run.trace"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "record": {
+                    "$ref": "#/$defs/RuntimeTraceRecord"
+                  }
+                },
+                "required": [
+                  "record"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "task.created"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "$ref": "#/$defs/Task"
+                  }
+                },
+                "required": [
+                  "task"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "task.claimed"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "$ref": "#/$defs/Task"
+                  }
+                },
+                "required": [
+                  "task"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "task.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "task": {
+                    "$ref": "#/$defs/Task"
+                  }
+                },
+                "required": [
+                  "task"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "approval.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "approval": {
+                    "$ref": "#/$defs/Approval"
+                  }
+                },
+                "required": [
+                  "approval"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "artifact.created"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "artifact": {
+                    "$ref": "#/$defs/Artifact"
+                  }
+                },
+                "required": [
+                  "artifact"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "memory.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "memory": {
+                    "$ref": "#/$defs/Memory"
+                  }
+                },
+                "required": [
+                  "memory"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "desktop.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "desktop": {
+                    "$ref": "#/$defs/Desktop"
+                  }
+                },
+                "required": [
+                  "desktop"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "operation.updated"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "operation": {
+                    "$ref": "#/$defs/Operation"
+                  }
+                },
+                "required": [
+                  "operation"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "diagnostic"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "error": {
+                    "$ref": "#/$defs/Error"
+                  }
+                },
+                "required": [
+                  "error"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Snapshot": {
+      "type": "object",
+      "properties": {
+        "retentionFrontier": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "workspace": {
+          "$ref": "#/$defs/Workspace"
+        },
+        "snapshotSeq": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "agents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Agent"
+          }
+        },
+        "channels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Channel"
+          }
+        },
+        "hosts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Host"
+          }
+        },
+        "activeRuns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Run"
+          }
+        },
+        "approvals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Approval"
+          }
+        }
+      },
+      "required": [
+        "retentionFrontier",
+        "workspace",
+        "snapshotSeq",
+        "agents",
+        "channels",
+        "hosts",
+        "activeRuns",
+        "approvals"
+      ],
+      "additionalProperties": false
+    },
+    "Login": {
+      "type": "object",
+      "properties": {
+        "oneTimeToken": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "oneTimeToken"
+      ],
+      "additionalProperties": false
+    },
+    "LoginResult": {
+      "type": "object",
+      "properties": {
+        "authenticated": {
+          "type": "boolean"
+        },
+        "csrfToken": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "authenticated",
+        "csrfToken"
+      ],
+      "additionalProperties": false
+    },
+    "Health": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "degraded"
+          ]
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "version"
+      ],
+      "additionalProperties": false
+    },
+    "RegisterArtifact": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "localPath": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "file",
+            "image",
+            "diff",
+            "test_report",
+            "log",
+            "context"
+          ]
+        },
+        "filename": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "localPath",
+        "kind",
+        "filename"
+      ],
+      "additionalProperties": false
+    },
+    "AckInbox": {
+      "type": "object",
+      "properties": {
+        "deliveryIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
+        },
+        "contextDigest": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "deliveryIds",
+        "contextDigest"
+      ],
+      "additionalProperties": false
+    },
+    "Metrics": {
+      "type": "object",
+      "properties": {
+        "activeRuns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pendingDeliveries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknownRuns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pendingApprovals": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hostLagMs": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "desktopQuarantines": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "activeRuns",
+        "pendingDeliveries",
+        "unknownRuns",
+        "pendingApprovals",
+        "hostLagMs",
+        "desktopQuarantines"
+      ],
+      "additionalProperties": false
+    },
+    "RuntimeTraceRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "launchId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "producerSeq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "agentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "runId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "nativeTurnId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "type": "string"
+        },
+        "lane": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "id",
+        "launchId",
+        "producerSeq",
+        "agentId",
+        "sessionId",
+        "runId",
+        "nativeTurnId",
+        "kind",
+        "lane",
+        "occurredAt",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "WorkspaceList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Workspace"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "HostList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Host"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "ProjectList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Project"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "AgentList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Agent"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "SessionList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Session"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "ChannelList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Channel"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "ThreadList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Thread"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "MessageList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Message"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "TaskList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Task"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "RunList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Run"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "DeliveryList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Delivery"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "ArtifactList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Artifact"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "MemoryList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Memory"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "RuntimeTraceRecordList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuntimeTraceRecord"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    },
+    "ApprovalList": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Approval"
+          }
+        },
+        "nextCursor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

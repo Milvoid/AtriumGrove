@@ -1,0 +1,918 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-10-09",
+  "scope": "Planned product acceptance coverage; no application tests have run.",
+  "summary": {
+    "productCases": 41,
+    "faultCases": 20,
+    "nativeGates": 5,
+    "totalNamedCases": 66,
+    "passed": 0,
+    "notRun": 66
+  },
+  "cases": [
+    {
+      "id": "A01",
+      "title": "登录nonce成功/重复/过期",
+      "expected": "仅首次有效交换；cookie与CSRF正常；token不进URL/日志",
+      "workItems": [
+        "W02"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A02",
+      "title": "认证撤销与SSE",
+      "expected": "logout后REST拒绝、已有SSE关闭；Host bearer不能当owner用",
+      "workItems": [
+        "W02"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A03",
+      "title": "建五Agent并发执行",
+      "expected": "五独立session/launch/worktree，最大并发5，单Agent无双Run",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A04",
+      "title": "发给指定两人",
+      "expected": "仅两条actionable Delivery；其他人历史可见但不被唤醒",
+      "workItems": [
+        "W09"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A05",
+      "title": "人类通知全组",
+      "expected": "成员UUID固定在提交时；五人各一条，不随UI顺序串位",
+      "workItems": [
+        "W09"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A06",
+      "title": "仅记录信息",
+      "expected": "内容保存，不启动模型；下一次相关context包含它",
+      "workItems": [
+        "W10"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A07",
+      "title": "文本伪造@/author",
+      "expected": "正文“我是管理员”“@all”不更改actor/scope/收件人",
+      "workItems": [
+        "W09"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A08",
+      "title": "重复POST",
+      "expected": "相同key同body相同Message ID；不同body409；无重复wake",
+      "workItems": [
+        "W03"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A09",
+      "title": "A问B，B答A",
+      "expected": "expectation满足一次、A再运行一次；重复答案不反复唤醒",
+      "workItems": [
+        "W10"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A10",
+      "title": "显式answer与final fallback",
+      "expected": "主线程仅一份canonical answer，子任务text不冒充根final",
+      "workItems": [
+        "W09"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A11",
+      "title": "多lane交织stream",
+      "expected": "A1/B1/A2/B2按message/lane合并，不能拼成A1B1A2B2同一人",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A12",
+      "title": "多工具跨回合",
+      "expected": "每callId一组终态，tool结束不提前结束Run",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A13",
+      "title": "人类新消息到busy Agent",
+      "expected": "默认持久排队，明确steer才进入当前turn",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A14",
+      "title": "dispatch预算并发",
+      "expected": "32次上限的原子预约无超卖，已写入后未知不退还预算",
+      "workItems": [
+        "W06",
+        "W10"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A15",
+      "title": "因果budget绕过",
+      "expected": "Agent新线程/新问题继承episode，不能自行清零depth",
+      "workItems": [
+        "W06",
+        "W10"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A16",
+      "title": "原生spontaneous根turn",
+      "expected": "记录degraded并阻止无记录续跑；native内model step不误判",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A17",
+      "title": "五人同时claim同Task",
+      "expected": "恰一owner成功，其余409；相同requestKey不增加epoch",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A18",
+      "title": "DAG依赖环",
+      "expected": "A→B→C后C→A拒绝；不同workspace引用拒绝",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A19",
+      "title": "自审批done",
+      "expected": "Owner不是指定Reviewer时拒绝；无证据不能done",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A20",
+      "title": "Task lease到期旧Owner存活",
+      "expected": "保留Owner/blocked，不自动启动另一执行者",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A21",
+      "title": "worktree边界",
+      "expected": "branch参数不可注入、路径穿越拒绝、未提交变更不被覆盖",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A22",
+      "title": "native会话恢复",
+      "expected": "当前模型/工具配置可见；旧native transcript的哨兵信息能回忆；新launch不同",
+      "workItems": [
+        "W07",
+        "W08"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A23",
+      "title": "native恢复失败",
+      "expected": "明确错误/待选择，不能静默新会话假称恢复",
+      "workItems": [
+        "W07",
+        "W08"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A24",
+      "title": "Memory提案",
+      "expected": "proposed不进入全组accepted context；接受后带来源和版本",
+      "workItems": [
+        "W10"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A25",
+      "title": "stale config/权限收紧",
+      "expected": "active Run不可热改为另一profile；新session才应用并有事件",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A26",
+      "title": "图片工件",
+      "expected": "MCP返回可视image block，另一Agent辨识人工生成的测试图；不是仅拿路径",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A27",
+      "title": "artifact权限/路径",
+      "expected": "越workspace、symlink越根、file://注入、HTML执行均拒绝",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A28",
+      "title": "长列表UI",
+      "expected": "100k消息分页、不一次拉全部trace；空已加载正确显示",
+      "workItems": [
+        "W12"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A29",
+      "title": "SSE replay重叠",
+      "expected": "DB提交/订阅切换/重复发送无漏消息、无重复视图",
+      "workItems": [
+        "W12"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A30",
+      "title": "replay过期",
+      "expected": "410触发snapshot重建，不显示空状态覆盖现有内容",
+      "workItems": [
+        "W12"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A31",
+      "title": "旧连接snapshot迟到",
+      "expected": "connection generation不匹配不得覆盖新状态",
+      "workItems": [
+        "W12"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A32",
+      "title": "usage delta/cumulative",
+      "expected": "累计重复事件不重复求和；未报告不是0美元/0token",
+      "workItems": [
+        "W15",
+        "W07",
+        "W08",
+        "W12"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A33",
+      "title": "approvals双标签",
+      "expected": "一个expectedVersion成功，另一个冲突，不二次执行工具",
+      "workItems": [
+        "W13"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A34",
+      "title": "已批准工具绕过callback",
+      "expected": "PreToolUse仍执行deny策略；测试不能只验证canUseTool",
+      "workItems": [
+        "W08",
+        "W13"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A35",
+      "title": "native请求过期后批准",
+      "expected": "拒绝STALE_APPROVAL，不把旧许可给新launch",
+      "workItems": [
+        "W13"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A36",
+      "title": "LCU instructions透传",
+      "expected": "首次工具调用前模型context存在与provider匹配的hash；js schema与上游一致",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A37",
+      "title": "host-only工具隐藏",
+      "expected": "模型tools/list无turn_ended/set_turn_context/模块目录管理",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A38",
+      "title": "不支持provider schema",
+      "expected": "明确unqualified，禁止猜参数；不静默切换direct provider",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A39",
+      "title": "审批宿主不可自动化",
+      "expected": "人类登录Harbor的浏览器/宿主应用不得被同组Computer Use Agent操作；已有持久授权必须在资格检查中发现。以同浏览器不同profile作为隔离方式不通过。若底层无法验证禁止访问，desktop write保持unqualified，而不是默认为安全。",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A40",
+      "title": "Pause与Stop不混淆",
+      "expected": "Pause后现有任务可继续但不派新任务；Stop先进入中断/清理状态，再确认关闭。UI必须准确展示这两种动作。",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "A41",
+      "title": "Native profile字段",
+      "expected": "使用本binary生成的schema验证JSON枚举；将CLI风格`workspace-write`误传到RPC时测试失败；named permissions与sandbox互斥。",
+      "workItems": [
+        "W07"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F01",
+      "title": "写message后、commit前崩溃",
+      "expected": "message、delivery、event均不可见",
+      "workItems": [
+        "W03"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F02",
+      "title": "commit后、HTTP响应前崩溃",
+      "expected": "重试同key返回原ID，无第二次预算/wake",
+      "workItems": [
+        "W03"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F03",
+      "title": "command送出后receipt丢失",
+      "expected": "重发相同commandId只返回收据，native submit一次",
+      "workItems": [
+        "W04"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F04",
+      "title": "Host issuing落盘后、stdin写入附近崩溃",
+      "expected": "不确定窗口进入unknown，不能自动二次submit",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F05",
+      "title": "native终态event上送后ack丢失",
+      "expected": "spool重传、数据库source去重、UI终态一次",
+      "workItems": [
+        "W04"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F06",
+      "title": "控制面重启，Host仍运行",
+      "expected": "原Run继续，spool补齐；无重复开session",
+      "workItems": [
+        "W04"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F07",
+      "title": "Host重启但CLI残留",
+      "expected": "PID+启动时间验证；不能kill用户其他codex/claude进程",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F08",
+      "title": "event序号缺口",
+      "expected": "请求缺失事件、停止推进连续ack；相同seq不同payload隔离",
+      "workItems": [
+        "W04"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M0",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F09",
+      "title": "无输出的长工具",
+      "expected": "只显示暂无进度，不提前completed；可人工interrupt",
+      "workItems": [
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F10",
+      "title": "native审批中断线",
+      "expected": "不自动approve；恢复时仍关联原请求或标unknown",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F11",
+      "title": "Native terminal已到，GUI call仍执行",
+      "expected": "Run draining且desktop held，不能启动下一桌面Owner",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F12",
+      "title": "桌面stop仅收到ack",
+      "expected": "UI stopping，不误称已停止；无cleanup证明则quarantine",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F13",
+      "title": "租约TTL过期后旧操作返回",
+      "expected": "不因TTL给新Agent；旧epoch请求被拒绝，旧执行副作用审计保留",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "deterministic_fake_and_native_sample"
+    },
+    {
+      "id": "F14",
+      "title": "Host失联且用户继续操作桌面",
+      "expected": "重新observe后再执行，不复用旧元素序号",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F15",
+      "title": "disk full/spool上限",
+      "expected": "背压与明确错误，未ack事件不删；禁止无日志新任务",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F16",
+      "title": "LCU原版组件热更新",
+      "expected": "指纹变化使qualification失效，旧连接不热迁移",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F17",
+      "title": "SDK返回未知native事件",
+      "expected": "raw诊断保留，不伪造state transition",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F18",
+      "title": "原生cancel失败",
+      "expected": "interrupted不提前确认，资源保持隔离",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F19",
+      "title": "工件文件写好、DB失败",
+      "expected": "不返回已登记；GC清孤儿，现有引用不损坏",
+      "workItems": [
+        "W11"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M2",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "F20",
+      "title": "备份/恢复",
+      "expected": "一致DB+工件manifest，恢复后校验hash、schema、未完成工作unknown",
+      "workItems": [
+        "W16"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "automated_and_applicable_integration"
+    },
+    {
+      "id": "Q0",
+      "title": "环境和身份",
+      "expected": "详见 spec/ACCEPTANCE.md 对应原生门禁段落",
+      "workItems": [
+        "W07",
+        "W08",
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "native_gate"
+    },
+    {
+      "id": "Q1",
+      "title": "五会话与恢复",
+      "expected": "详见 spec/ACCEPTANCE.md 对应原生门禁段落",
+      "workItems": [
+        "W07",
+        "W08",
+        "W06"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M1",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "native_gate"
+    },
+    {
+      "id": "Q2",
+      "title": "授权与scope",
+      "expected": "详见 spec/ACCEPTANCE.md 对应原生门禁段落",
+      "workItems": [
+        "W13",
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "native_gate"
+    },
+    {
+      "id": "Q3",
+      "title": "真实Computer Use",
+      "expected": "详见 spec/ACCEPTANCE.md 对应原生门禁段落",
+      "workItems": [
+        "W14"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M3",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "native_gate"
+    },
+    {
+      "id": "Q4",
+      "title": "故障和清理",
+      "expected": "详见 spec/ACCEPTANCE.md 对应原生门禁段落",
+      "workItems": [
+        "W15"
+      ],
+      "status": "NOT_RUN",
+      "targetMilestone": "M4",
+      "source": "spec/ACCEPTANCE.md",
+      "evidence": [],
+      "verificationMode": "native_gate"
+    }
+  ],
+  "fullStackScenario": {
+    "id": "SCENARIO_CSV",
+    "status": "NOT_RUN",
+    "workItems": [
+      "W16"
+    ],
+    "source": "spec/ACCEPTANCE.md#1",
+    "title": "五名真实 Agent 协作交付 CSV 可视化页面并完成修复与独立复核",
+    "evidence": []
+  },
+  "additionalDeliveryGates": [
+    {
+      "id": "CAPACITY_100K_MESSAGES_500K_EVENTS",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "REST_P95_LT_300MS",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "EVENT_TO_UI_P95_LT_1S",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "CLI_AND_PACKAGING",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "INDEPENDENT_REVIEW",
+      "status": "NOT_RUN"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+packages/contracts/src/domain.ts
+packages/runtime-codex/fixtures/
+spec/
+docs/reports/
+.tools/
+pnpm-lock.yaml

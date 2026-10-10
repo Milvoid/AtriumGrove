@@ -1,0 +1,411 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://harbor.local/contracts/tools.schema.json",
+  "title": "Atrium Grove model-facing tool arguments",
+  "$defs": {
+    "collab_context": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "collab_read": {
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "threadId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "afterSeq": {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [
+        "channelId"
+      ],
+      "additionalProperties": false
+    },
+    "collab_post": {
+      "type": "object",
+      "properties": {
+        "artifactIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "threadId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "replyToMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 65536
+        },
+        "recipients": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true,
+          "maxItems": 3
+        },
+        "requestResponse": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "message",
+            "progress",
+            "question",
+            "answer",
+            "proposal"
+          ]
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "channelId",
+        "text",
+        "recipients",
+        "requestResponse",
+        "kind",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    },
+    "collab_inbox": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "collab_ack": {
+      "type": "object",
+      "properties": {
+        "deliveryIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1,
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "readReceiptId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "deliveryIds",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    },
+    "task_list": {
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "in_progress",
+            "blocked",
+            "in_review",
+            "done",
+            "cancelled"
+          ]
+        },
+        "cursor": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "task_get": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "taskId"
+      ],
+      "additionalProperties": false
+    },
+    "task_create": {
+      "type": "object",
+      "properties": {
+        "reviewerAgentId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "channelId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "threadId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "sourceMessageId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "description": {
+          "type": "string"
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "channelId",
+        "threadId",
+        "title",
+        "description",
+        "acceptanceCriteria",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    },
+    "task_claim": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "taskId",
+        "expectedVersion",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    },
+    "task_transition": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "todo",
+            "blocked",
+            "in_review",
+            "done",
+            "cancelled"
+          ]
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "leaseEpoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        },
+        "artifactIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "taskId",
+        "status",
+        "expectedVersion",
+        "leaseEpoch",
+        "artifactIds",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    },
+    "artifact_register": {
+      "type": "object",
+      "properties": {
+        "localPath": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "file",
+            "image",
+            "diff",
+            "test_report",
+            "log"
+          ]
+        },
+        "filename": {
+          "type": "string"
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "localPath",
+        "kind",
+        "filename",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    },
+    "artifact_read": {
+      "type": "object",
+      "properties": {
+        "artifactId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "artifactId"
+      ],
+      "additionalProperties": false
+    },
+    "memory_propose": {
+      "type": "object",
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": [
+            "workspace",
+            "agent",
+            "thread"
+          ]
+        },
+        "ownerId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "sourceMessageIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1
+        },
+        "requestKey": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "scope",
+        "title",
+        "body",
+        "sourceMessageIds",
+        "requestKey"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "name": "atrium-grove",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "atrium-grove": "tsx apps/control/src/cli.ts",
+    "dev": "tsx apps/control/src/cli.ts serve",
+    "harbor": "tsx apps/control/src/cli.ts",
+    "host": "tsx apps/host/src/main.ts",
+    "web": "vite --config apps/web/vite.config.ts",
+    "generate": "tsx scripts/generate.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "pnpm generate && pnpm typecheck && vite build --config apps/web/vite.config.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "pnpm build && pnpm test",
+    "preview": "tsx scripts/preview.ts",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,css,json}\" \"packages/**/*.ts\" \"scripts/*.ts\" \"tests/*.ts\"",
+    "test:report": "tsx --test --test-reporter=tap tests/*.test.ts",
+    "qualify:continuity": "tsx scripts/qualify-native.ts --no-tools",
+    "qualify:tools": "tsx scripts/qualify-native.ts",
+    "probe:lcu": "tsx scripts/probe-lcu.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.295",
+    "@fastify/cookie": "11.1.3",
+    "@fastify/static": "10.1.5",
+    "@fastify/websocket": "11.3.3",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "@tanstack/react-query": "5.104.1",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "fastify": "5.12.5",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
+    "ws": "8.22.0",
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/ws": "8.18.2",
+    "prettier": "3.6.2",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "8.3.4"
+  }
+}

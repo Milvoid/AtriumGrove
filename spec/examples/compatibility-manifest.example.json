@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "UNQUALIFIED_TEMPLATE",
+  "platform": "darwin",
+  "architecture": "arm64",
+  "harborCommit": null,
+  "packageLockSha256": null,
+  "codex": {
+    "realPath": null,
+    "version": null,
+    "sha256": null,
+    "generatedProtocolSha256": null,
+    "verifiedModelId": null,
+    "qualified": false
+  },
+  "claude": {
+    "realPath": null,
+    "version": null,
+    "sha256": null,
+    "agentSdkVersion": null,
+    "verifiedModelId": null,
+    "qualified": false
+  },
+  "computer": {
+    "provider": "lcu",
+    "providerVersion": null,
+    "runtimeFingerprint": null,
+    "instructionsSha256": null,
+    "toolSchemaSha256": null,
+    "humanControlHostExcluded": false,
+    "qualified": false
+  },
+  "gates": {"Q0": "NOT_RUN", "Q1": "NOT_RUN", "Q2": "NOT_RUN", "Q3": "NOT_RUN", "Q4": "NOT_RUN"}
+}

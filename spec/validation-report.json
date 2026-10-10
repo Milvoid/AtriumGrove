@@ -1,0 +1,104 @@
+{
+  "scope": "Specification artifact checks only; no real Harness, WebUI, or Computer Use integration was executed.",
+  "generatedAt": "2026-10-10T03:45:23.145837+00:00",
+  "overall": "PASS",
+  "counts": {
+    "domainDefinitions": 73,
+    "httpOperations": 54,
+    "modelTools": 13,
+    "checks": 21
+  },
+  "checks": [
+    {
+      "name": "domain JSON Schema draft 2020-12 validity",
+      "status": "PASS"
+    },
+    {
+      "name": "model-facing tool argument schemas validity",
+      "status": "PASS"
+    },
+    {
+      "name": "domain internal references resolve",
+      "status": "PASS"
+    },
+    {
+      "name": "OpenAPI internal references resolve",
+      "status": "PASS"
+    },
+    {
+      "name": "OpenAPI paths, unique operations, mutation guards and schema parity",
+      "status": "PASS"
+    },
+    {
+      "name": "positive domain and collaboration-tool examples",
+      "status": "PASS"
+    },
+    {
+      "name": "schemas reject forged author and duplicate recipients",
+      "status": "PASS"
+    },
+    {
+      "name": "five-agent team and channel references",
+      "status": "PASS"
+    },
+    {
+      "name": "control SQL migration executes",
+      "status": "PASS"
+    },
+    {
+      "name": "Host SQL migration executes",
+      "status": "PASS"
+    },
+    {
+      "name": "relational test fixture inserts",
+      "status": "PASS"
+    },
+    {
+      "name": "one live session per Agent enforced",
+      "status": "PASS"
+    },
+    {
+      "name": "running and UNKNOWN both reserve Agent execution slot",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical source message permits only one Task",
+      "status": "PASS"
+    },
+    {
+      "name": "Task claim compare-and-swap single winner",
+      "status": "PASS"
+    },
+    {
+      "name": "state and event atomic rollback",
+      "status": "PASS"
+    },
+    {
+      "name": "desktop conditional ownership and quarantine exclusion",
+      "status": "PASS"
+    },
+    {
+      "name": "database foreign keys remain valid",
+      "status": "PASS"
+    },
+    {
+      "name": "documentation completeness and source IDs",
+      "status": "PASS"
+    },
+    {
+      "name": "canonical event payloads use typed domain objects",
+      "status": "PASS"
+    },
+    {
+      "name": "TypeScript runtime contract strict typecheck",
+      "status": "PASS"
+    }
+  ],
+  "nativeQualification": {
+    "Q0": "NOT_RUN",
+    "Q1": "NOT_RUN",
+    "Q2": "NOT_RUN",
+    "Q3": "NOT_RUN",
+    "Q4": "NOT_RUN"
+  }
+}

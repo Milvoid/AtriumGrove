@@ -1,0 +1,163 @@
+{
+  "asOf": "2026-10-09",
+  "scope": "Public source review and protocol verification; no live macOS or authenticated Harness tests were performed.",
+  "sources": [
+    {
+      "id": "R01",
+      "project": "Raft",
+      "commit": "26f77ef97c40d3d91aa2c5e42b0fd66b8bf39fe6",
+      "version": "v1.21.2-source.1",
+      "paths": [
+        "README.md",
+        "LICENSE",
+        "packages/daemon/src/drivers/types.ts",
+        "packages/shared/src/externalAgentIntegration.ts",
+        "packages/daemon/src/drivers/cliTransport.ts",
+        "packages/daemon/src/apmStateMachine.ts",
+        "packages/web/src/store/taskStore.ts",
+        "packages/server/src/services/agentInboxEvents.ts"
+      ],
+      "base": "https://github.com/botiverse/raft-source/blob/26f77ef97c40d3d91aa2c5e42b0fd66b8bf39fe6/",
+      "inspection": "Read file contents; types.ts large response was partial, so only visible contracts are relied upon. Additional reads: taskStore and agentInboxEvents first 150-155 lines."
+    },
+    {
+      "id": "R02",
+      "project": "Raft task and replay",
+      "commit": "26f77ef97c40d3d91aa2c5e42b0fd66b8bf39fe6",
+      "paths": [
+        "manual/recipes/technique/task-claim-lock.md",
+        "packages/cli/src/commands/task/claim.ts",
+        "packages/server/src/services/nativeNotificationService.ts",
+        "packages/sync-core/src/domains/activity.ts"
+      ],
+      "base": "https://github.com/botiverse/raft-source/blob/26f77ef97c40d3d91aa2c5e42b0fd66b8bf39fe6/",
+      "inspection": "Targeted code-search excerpts, not full-file audit."
+    },
+    {
+      "id": "R03",
+      "project": "OAR",
+      "commit": "7dc98e08f9c0ba99158ddada29cb0d4c80ef7dc6",
+      "version": "0.45.1",
+      "paths": [
+        "README.md",
+        "docs/runtimes/claude.md",
+        "packages/oar/src/runtimes/claude/session.ts",
+        "packages/oar/src/runtimes/claude/launch.ts"
+      ],
+      "base": "https://github.com/botiverse/oar/blob/7dc98e08f9c0ba99158ddada29cb0d4c80ef7dc6/",
+      "inspection": "README, session lines 1-200, launch file, and beginning of long runtime document."
+    },
+    {
+      "id": "R04",
+      "project": "Codex App Server",
+      "url": "https://learn.chatgpt.com/docs/app-server",
+      "inspection": "Official protocol documentation: initialization, thread/turn lifecycle, approvals, MCP calls, experimental capability negotiation."
+    },
+    {
+      "id": "R05",
+      "project": "Codex protocol source",
+      "commit": "2351d9e1b608e6f9d9a3699b71d7eb39ee41cfa4",
+      "paths": [
+        "codex-rs/app-server-protocol/src/protocol/common.rs",
+        "codex-rs/app-server-protocol/schema/typescript/v2/McpServerToolCallParams.ts",
+        "codex-rs/app-server/src/message_processor.rs"
+      ],
+      "base": "https://github.com/openai/codex/blob/2351d9e1b608e6f9d9a3699b71d7eb39ee41cfa4/",
+      "inspection": "Targeted source excerpts confirming method dispatch and parameter shape; this is a reviewed source revision, not an installed/tested binary."
+    },
+    {
+      "id": "R06",
+      "project": "Claude Agent SDK overview",
+      "url": "https://code.claude.com/docs/en/agent-sdk/overview",
+      "inspection": "Official documentation: SDK runs Claude Code binary, not a replacement model loop."
+    },
+    {
+      "id": "R07",
+      "project": "Claude CLI",
+      "url": "https://code.claude.com/docs/en/cli-reference",
+      "inspection": "stream-json, resume, replay-user-messages, partial streaming flags."
+    },
+    {
+      "id": "R08",
+      "project": "Claude approvals",
+      "url": "https://code.claude.com/docs/en/agent-sdk/user-input",
+      "inspection": "canUseTool, PreToolUse distinction, AskUserQuestion, callback cancellation."
+    },
+    {
+      "id": "R09",
+      "project": "Claude streaming input",
+      "url": "https://code.claude.com/docs/en/agent-sdk/streaming-vs-single-mode",
+      "inspection": "Official streaming-input guide."
+    },
+    {
+      "id": "R10",
+      "project": "Claude system prompt",
+      "url": "https://code.claude.com/docs/en/agent-sdk/modifying-system-prompts",
+      "inspection": "Official prompt configuration; preserve Claude Code preset and append collaboration instructions."
+    },
+    {
+      "id": "R11",
+      "project": "Claude MCP",
+      "url": "https://code.claude.com/docs/en/agent-sdk/mcp",
+      "inspection": "Official session MCP configuration and tool integration."
+    },
+    {
+      "id": "R12",
+      "project": "LCU",
+      "commit": "45e5a917e768edddb5c1b6fe737b7cdddc9cbebe",
+      "paths": [
+        "README.md",
+        "docs/ADAPTERS.md",
+        "adapters/client.mjs"
+      ],
+      "base": "https://github.com/amontlabs/lcu/blob/45e5a917e768edddb5c1b6fe737b7cdddc9cbebe/",
+      "inspection": "README, shared client contract in ADAPTERS, client lines 1-230. No live parity testing."
+    },
+    {
+      "id": "R13",
+      "project": "Direct Computer Use MCP",
+      "commit": "dc72bae614dccd01ef9d0ffd8fdcfd42c990fc78",
+      "paths": [
+        "README.md",
+        "src/direct-broker.ts",
+        "test/direct-broker.test.ts"
+      ],
+      "base": "https://github.com/tmustier/codex-computer-use-mcp/blob/dc72bae614dccd01ef9d0ffd8fdcfd42c990fc78/",
+      "inspection": "README and targeted direct-call/test excerpts; not a full security audit."
+    },
+    {
+      "id": "R14",
+      "project": "MCP transport specification",
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/transports",
+      "inspection": "Pinned protocol revision, stdio framing and HTTP security. Not a claim that this is the newest protocol revision."
+    },
+    {
+      "id": "R15",
+      "project": "SQLite WAL",
+      "url": "https://sqlite.org/wal.html",
+      "inspection": "Local filesystem restriction, single writer, transaction durability."
+    },
+    {
+      "id": "R16",
+      "project": "Official Computer Use",
+      "url": "https://learn.chatgpt.com/docs/computer-use",
+      "inspection": "Product-level documentation, not proof that every standalone CLI can use native components."
+    },
+    {
+      "id": "R17",
+      "project": "Claude Agent SDK public repository",
+      "commit": "da321bbe62ed45d10a1ff0e77a948253d9eee3e0",
+      "paths": [
+        "CHANGELOG.md"
+      ],
+      "base": "https://github.com/anthropics/claude-agent-sdk-typescript/blob/da321bbe62ed45d10a1ff0e77a948253d9eee3e0/",
+      "inspection": "Targeted changelog excerpts for pathToClaudeCodeExecutable. Proprietary Claude Code engine source was not inspected."
+    },
+    {
+      "id": "R18",
+      "project": "Claude SDK subscription and third-party usage",
+      "url": "https://support.claude.com/en/articles/15036540-use-the-claude-agent-sdk-with-your-claude-plan",
+      "inspection": "Official help article updated October 7, 2026, read alongside SDK overview restrictions; not legal advice or a commercial-distribution permission claim."
+    }
+  ]
+}
